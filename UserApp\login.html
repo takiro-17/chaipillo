@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — SuperFit</title>
+    <meta name="description" content="Sign in to SuperFit to access your gym membership, track workouts, and shop fitness products.">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="app-container">
+    <div class="auth-container">
+        
+        <!-- Brand -->
+        <div class="auth-brand">
+            <div class="logo-orb">💪</div>
+            <h1>SuperFit</h1>
+            <p>Your fitness journey starts here</p>
+        </div>
+
+        <!-- Auth Card -->
+        <div class="auth-card liquid-glass" style="padding:32px 28px;">
+
+            <!-- Step 1: Phone Input -->
+            <div id="authStep1">
+                <h2 style="font-size:1.3rem; font-weight:700; margin-bottom:6px; text-align:center;">Welcome Back</h2>
+                <p style="text-align:center; color:var(--text-secondary); font-size:0.88rem; margin-bottom:28px;">Enter your phone number to continue</p>
+                
+                <div style="margin-bottom:18px;">
+                    <label style="font-size:0.8rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:8px;">Phone Number</label>
+                    <div style="display:flex; gap:8px;">
+                        <div style="padding:14px 12px; background:var(--bg-input); border:1px solid var(--border-glass); border-radius:var(--radius-md); color:var(--text-secondary); font-size:0.95rem; font-weight:600; white-space:nowrap;">🇮🇳 +91</div>
+                        <input type="tel" id="phoneInput" class="input-glass" placeholder="9876543210" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')" style="flex:1;">
+                    </div>
+                </div>
+
+                <div style="margin-bottom:18px;">
+                    <label style="font-size:0.8rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:8px;">Your Name</label>
+                    <input type="text" id="nameInput" class="input-glass" placeholder="Enter your name">
+                </div>
+
+                <div id="phoneError" style="display:none; background:var(--primary-soft); color:var(--primary); padding:10px 16px; border-radius:var(--radius-sm); font-size:0.85rem; font-weight:600; margin-bottom:16px; text-align:center;"></div>
+
+                <button class="btn-primary" style="width:100%; padding:16px;" onclick="sendOTP()" id="sendOTPBtn">
+                    <span>Continue</span>
+                    <span>→</span>
+                </button>
+
+                <div style="text-align:center; margin-top:20px;">
+                    <a href="index.html" style="color:var(--text-secondary); font-size:0.85rem; font-weight:500;">← Continue as Guest</a>
+                </div>
+            </div>
+
+            <!-- Step 2: OTP Verify -->
+            <div id="authStep2" style="display:none;">
+                <div style="text-align:center;">
+                    <div style="font-size:3rem; margin-bottom:12px;">🔐</div>
+                    <h2 style="font-size:1.3rem; font-weight:700; margin-bottom:6px;">Verify OTP</h2>
+                    <p style="color:var(--text-secondary); font-size:0.88rem; margin-bottom:8px;">Code sent to <strong id="otpPhone" style="color:var(--primary);">+91 XXXXX</strong></p>
+                    <p style="color:var(--text-tertiary); font-size:0.78rem; margin-bottom:20px;">Use test code <strong style="color:var(--secondary);">123456</strong></p>
+                </div>
+
+                <div class="otp-group" id="otpGroup">
+                    <input type="text" maxlength="1" oninput="otpAutoTab(this,0)" onkeydown="otpBackspace(event,this,0)">
+                    <input type="text" maxlength="1" oninput="otpAutoTab(this,1)" onkeydown="otpBackspace(event,this,1)">
+                    <input type="text" maxlength="1" oninput="otpAutoTab(this,2)" onkeydown="otpBackspace(event,this,2)">
+                    <input type="text" maxlength="1" oninput="otpAutoTab(this,3)" onkeydown="otpBackspace(event,this,3)">
+                    <input type="text" maxlength="1" oninput="otpAutoTab(this,4)" onkeydown="otpBackspace(event,this,4)">
+                    <input type="text" maxlength="1" oninput="otpAutoTab(this,5)" onkeydown="otpBackspace(event,this,5)">
+                </div>
+
+                <div id="otpError" style="display:none; background:var(--primary-soft); color:var(--primary); padding:10px 16px; border-radius:var(--radius-sm); font-size:0.85rem; font-weight:600; margin-bottom:16px; text-align:center;"></div>
+
+                <button class="btn-primary" style="width:100%; padding:16px;" onclick="verifyOTP()" id="verifyOTPBtn">
+                    <span>Verify & Sign In</span>
+                </button>
+
+                <div style="text-align:center; margin-top:20px;">
+                    <button style="background:none; color:var(--text-secondary); font-size:0.85rem; font-weight:500;" onclick="goBackToPhone()">← Change number</button>
+                    <span style="color:var(--text-tertiary); margin:0 8px;">·</span>
+                    <button id="resendBtn" style="background:none; color:var(--secondary); font-size:0.85rem; font-weight:600;" onclick="resendOTP()">Resend OTP</button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer App Links -->
+        <div style="margin-top:40px; text-align:center;">
+            <p style="font-size:0.75rem; color:var(--text-tertiary);">By continuing, you agree to our Terms & Privacy Policy</p>
+        </div>
+
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="toast-container"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../shared-supabase-client.js"></script>
+<script src="../shared-entry-bridge.js"></script>
+<script src="app.js"></script>
+<script>
+    renderAmbientBg();
+
+    // If already logged in, redirect
+    if (isLoggedIn()) {
+        window.location.href = 'index.html';
+    }
+
+    let pendingPhone = '';
+    let pendingName = '';
+
+    function sendOTP() {
+        const phone = document.getElementById('phoneInput').value.trim();
+        const name = document.getElementById('nameInput').value.trim();
+        const errorBox = document.getElementById('phoneError');
+        errorBox.style.display = 'none';
+
+        if (!phone || phone.length !== 10) {
+            errorBox.textContent = '⚠️ Please enter a valid 10-digit phone number';
+            errorBox.style.display = 'block';
+            return;
+        }
+        if (!name) {
+            errorBox.textContent = '⚠️ Please enter your name';
+            errorBox.style.display = 'block';
+            return;
+        }
+
+        pendingPhone = phone;
+        pendingName = name;
+
+        // Show OTP step
+        document.getElementById('otpPhone').textContent = '+91 ' + phone.slice(0, 5) + '***' + phone.slice(8);
+        document.getElementById('authStep1').style.display = 'none';
+        document.getElementById('authStep2').style.display = 'block';
+
+        // Focus first OTP input
+        setTimeout(() => {
+            document.querySelector('#otpGroup input').focus();
+        }, 100);
+
+        showToast('OTP sent to +91 ' + phone, 'info');
+    }
+
+    function otpAutoTab(input, index) {
+        input.value = input.value.replace(/[^0-9]/g, '');
+        if (input.value.length === 1) {
+            const inputs = document.querySelectorAll('#otpGroup input');
+            if (index < 5) inputs[index + 1].focus();
+        }
+    }
+
+    function otpBackspace(e, input, index) {
+        if (e.key === 'Backspace' && !input.value && index > 0) {
+            const inputs = document.querySelectorAll('#otpGroup input');
+            inputs[index - 1].focus();
+        }
+    }
+
+    function getOTPValue() {
+        const inputs = document.querySelectorAll('#otpGroup input');
+        return Array.from(inputs).map(i => i.value).join('');
+    }
+
+    function verifyOTP() {
+        const otp = getOTPValue();
+        const errorBox = document.getElementById('otpError');
+        errorBox.style.display = 'none';
+
+        if (otp.length !== 6) {
+            errorBox.textContent = '⚠️ Please enter all 6 digits';
+            errorBox.style.display = 'block';
+            return;
+        }
+
+        if (otp !== '123456') {
+            errorBox.textContent = '⚠️ Incorrect OTP. Use test code 123456';
+            errorBox.style.display = 'block';
+            // Shake effect
+            document.getElementById('otpGroup').style.animation = 'none';
+            document.getElementById('otpGroup').offsetHeight;
+            document.getElementById('otpGroup').style.animation = 'shake 0.4s ease';
+            return;
+        }
+
+        // Success! Create user
+        const btn = document.getElementById('verifyOTPBtn');
+        btn.innerHTML = '<span>✓ Verified! Redirecting...</span>';
+        btn.style.background = 'var(--secondary)';
+
+        const userData = {
+            name: pendingName,
+            phone: pendingPhone,
+            joinDate: new Date().toISOString(),
+            membership: null
+        };
+        saveUserData(userData);
+
+        showToast('Welcome to SuperFit, ' + pendingName + '! 🎉', 'success');
+
+        setTimeout(() => {
+            // Redirect to where they came from or home
+            const redirect = getParam('redirect') || 'index.html';
+            window.location.href = redirect;
+        }, 1000);
+    }
+
+    function goBackToPhone() {
+        document.getElementById('authStep2').style.display = 'none';
+        document.getElementById('authStep1').style.display = 'block';
+        // Clear OTP inputs
+        document.querySelectorAll('#otpGroup input').forEach(i => i.value = '');
+    }
+
+    function resendOTP() {
+        const btn = document.getElementById('resendBtn');
+        btn.textContent = 'Sent!';
+        btn.style.color = 'var(--primary)';
+        showToast('OTP resent to +91 ' + pendingPhone, 'info');
+        setTimeout(() => {
+            btn.textContent = 'Resend OTP';
+            btn.style.color = '';
+        }, 3000);
+    }
+</script>
+
+<style>
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-8px); }
+        50% { transform: translateX(8px); }
+        75% { transform: translateX(-8px); }
+    }
+</style>
+
+</body>
+</html>
