@@ -543,4 +543,136 @@
         expireStalePendingRequests: expireStalePendingRequests,
         pruneResolvedRequests: pruneResolvedRequests
     };
+
+    function patchOwnerEntryActions() {
+        if (typeof window.getLiveBridgeRequestById !== 'function') return;
+        if (window.__fitconnectOwnerEntryActionsPatched) return;
+
+        window.__fitconnectOwnerEntryActionsPatched = true;
+
+        window.getActionableLiveRequest = function(requestId) {
+            var bridgeRequest = window.getLiveBridgeRequestById(requestId);
+            if (bridgeRequest) {
+                return {
+                    id: bridgeRequest.id,
+                    name: bridgeRequest.userName || 'Member',
+                    otp: bridgeRequest.otp,
+                    status: bridgeRequest.status,
+                    requestedAt: bridgeRequest.requestedAt || bridgeRequest.updatedAt || new Date().toISOString(),
+                    gymName: bridgeRequest.gymName || '',
+                    userPhone: bridgeRequest.userPhone || ''
+                };
+            }
+
+            if (typeof window.getLiveRequestById === 'function') {
+                return window.getLiveRequestById(requestId);
+            }
+
+            return null;
+        };
+
+        if (typeof window.processRequest === 'function') {
+            window.processRequest = function(id, isApprove, name) {
+                var box = document.getElementById('reqBox-' + id);
+                var request = window.getActionableLiveRequest(id);
+                var requestName = request && request.name ? request.name : name;
+
+                if (!request) {
+                    if (typeof window.renderLiveRequests === 'function') {
+                        window.renderLiveRequests();
+                    }
+                    if (typeof window.showToast === 'function') {
+                        window.showToast('This request expired, was cancelled, or is no longer pending.', 'info');
+                    }
+                    return;
+                }
+
+                if (isApprove) {
+                    if (typeof window.showOTPModal === 'function') {
+                        window.showOTPModal(id, requestName);
+                    }
+                    return;
+                }
+
+                if (box) {
+                    box.style.transform = 'translateX(-20px)';
+                    box.style.opacity = '0';
+                }
+
+                setTimeout(function() {
+                    var bridge = typeof window.getLiveRequestBridge === 'function'
+                        ? window.getLiveRequestBridge()
+                        : (window.FitConnectEntryBridge || null);
+
+                    if (bridge && typeof bridge.resolveRequest === 'function') {
+                        bridge.resolveRequest(id, 'rejected', {
+                            gymId: typeof window.getOwnerGymId === 'function' ? window.getOwnerGymId() : null,
+                            rejectedAt: new Date().toISOString(),
+                            ownerGymName: typeof window.getOwnerGymName === 'function' ? window.getOwnerGymName() : ''
+                        });
+                    } else if (Array.isArray(window.fakeLiveRequests)) {
+                        window.fakeLiveRequests = window.fakeLiveRequests.filter(function(item) {
+                            return item.id !== id;
+                        });
+                    }
+
+                    if (typeof window.renderLiveRequests === 'function') {
+                        window.renderLiveRequests();
+                    }
+                    if (typeof window.showToast === 'function') {
+                        window.showToast('Rejected entry for ' + requestName, 'info');
+                    }
+                }, 300);
+            };
+        }
+
+        if (typeof window.showOTPModal === 'function') {
+            window.showOTPModal = function(id, name) {
+                var request = window.getActionableLiveRequest(id);
+                if (!request) {
+                    if (typeof window.renderLiveRequests === 'function') {
+                        window.renderLiveRequests();
+                    }
+                    if (typeof window.showToast === 'function') {
+                        window.showToast('This request expired, was cancelled, or is no longer pending.', 'warning');
+                    }
+                    return;
+                }
+
+                window.currentOtpid = id;
+                window.currentOtpName = request.name || name;
+                window.otpVerificationInFlight = false;
+
+                var memberNode = document.getElementById('otpMemberName');
+                var inputNode = document.getElementById('otpModalInput');
+                var modalNode = document.getElementById('otpModal');
+
+                if (!memberNode || !inputNode || !modalNode) return;
+
+                memberNode.innerText = window.currentOtpName;
+                inputNode.value = '';
+                modalNode.style.display = 'flex';
+
+                if (typeof window.syncOtpModalState === 'function') {
+                    window.syncOtpModalState();
+                }
+                if (typeof window.startOtpModalTicker === 'function') {
+                    window.startOtpModalTicker();
+                }
+                if (typeof inputNode.focus === 'function') {
+                    inputNode.focus();
+                }
+            };
+        }
+    }
+
+    if (typeof window !== 'undefined') {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                window.setTimeout(patchOwnerEntryActions, 0);
+            });
+        } else {
+            window.setTimeout(patchOwnerEntryActions, 0);
+        }
+    }
 })();
