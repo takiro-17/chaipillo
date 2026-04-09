@@ -544,3 +544,65 @@
         pruneResolvedRequests: pruneResolvedRequests
     };
 })();
+
+(function() {
+    function getCurrentPageName() {
+        var path = String(window.location.pathname || '');
+        var parts = path.split('/');
+        return String(parts[parts.length - 1] || '').toLowerCase();
+    }
+
+    function hideFloatingCartOutsideStore() {
+        var cartFab = document.getElementById('cartFab');
+        if (!cartFab) return;
+
+        if (getCurrentPageName() !== 'store.html') {
+            cartFab.style.display = 'none';
+        } else {
+            cartFab.style.display = '';
+        }
+    }
+
+    function refreshReviewGateCopy() {
+        var noteBlocks = document.querySelectorAll('.review-gate-note > div');
+        if (!noteBlocks || !noteBlocks.length) return;
+
+        Array.prototype.forEach.call(noteBlocks, function(node) {
+            var currentText = String(node.textContent || '').trim();
+            if (currentText === 'Review unlocked after you join this gym') {
+                node.textContent = 'Only members of this gym can review';
+            }
+        });
+    }
+
+    function applyUserAppHotfixes() {
+        hideFloatingCartOutsideStore();
+        refreshReviewGateCopy();
+    }
+
+    function startHotfixObserver() {
+        if (!window.MutationObserver || !document.body || window.__fitConnectHotfixObserverStarted) return;
+
+        window.__fitConnectHotfixObserverStarted = true;
+        var observer = new MutationObserver(function() {
+            applyUserAppHotfixes();
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            applyUserAppHotfixes();
+            startHotfixObserver();
+        });
+    } else {
+        applyUserAppHotfixes();
+        startHotfixObserver();
+    }
+
+    window.addEventListener('load', applyUserAppHotfixes);
+})();
