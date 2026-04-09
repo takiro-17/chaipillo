@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - SuperFit</title>
+    <meta name="description" content="Create your SuperFit member account or sign in securely with Supabase email OTP.">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="app-container">
+    <div class="auth-container">
+        <div class="auth-brand">
+            <div class="logo-orb">&#128170;</div>
+            <h1>SuperFit</h1>
+            <p>Fitness access that feels simple on mobile</p>
+        </div>
+
+        <div class="auth-card liquid-glass" style="padding:30px 24px;">
+            <div class="auth-mode-switch" style="display:flex; gap:10px; margin-bottom:24px; padding:6px; border-radius:18px; background:rgba(255,255,255,0.05); border:1px solid var(--border-glass);">
+                <button type="button" id="signInModeBtn" class="auth-mode-btn" onclick="switchMode('signin')" style="flex:1; min-height:46px; border-radius:14px; font-weight:700;">Sign In</button>
+                <button type="button" id="createModeBtn" class="auth-mode-btn" onclick="switchMode('create')" style="flex:1; min-height:46px; border-radius:14px; font-weight:700;">Create Account</button>
+            </div>
+
+            <div id="authContextNote" style="display:none; background:rgba(255,90,95,0.12); color:var(--primary); padding:12px 14px; border-radius:var(--radius-md); font-size:0.82rem; font-weight:600; margin-bottom:16px;"></div>
+
+            <div id="wizardStep" style="display:block;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+                    <div>
+                        <p id="stepEyebrow" style="font-size:0.76rem; letter-spacing:0.16em; text-transform:uppercase; color:var(--secondary); font-weight:700; margin-bottom:6px;">Create Account</p>
+                        <h2 id="stepTitle" style="font-size:1.35rem; font-weight:800; margin:0;">What should we call you?</h2>
+                    </div>
+                    <div id="stepCounter" style="min-width:52px; text-align:center; padding:8px 10px; border-radius:999px; background:rgba(255,255,255,0.06); color:var(--text-secondary); font-size:0.78rem; font-weight:700;">1 / 5</div>
+                </div>
+
+                <p id="stepDescription" style="color:var(--text-secondary); font-size:0.9rem; line-height:1.5; margin-bottom:18px;">We use your name across your gym activity, reviews, and membership.</p>
+
+                <div id="stepProgress" style="display:flex; gap:8px; margin-bottom:22px;"></div>
+
+                <div id="fieldShell"></div>
+
+                <div id="wizardError" style="display:none; background:var(--primary-soft); color:var(--primary); padding:10px 16px; border-radius:var(--radius-sm); font-size:0.85rem; font-weight:600; margin-top:16px; text-align:center;"></div>
+
+                <div style="display:flex; gap:10px; margin-top:22px;">
+                    <button type="button" id="backBtn" class="btn-secondary" onclick="goBackStep()" style="flex:0 0 110px; display:none;">Back</button>
+                    <button type="button" id="nextBtn" class="btn-primary" onclick="goNextStep()" style="flex:1;">Continue</button>
+                </div>
+
+                <div style="text-align:center; margin-top:18px;">
+                    <button type="button" id="modeHintBtn" style="background:none; color:var(--text-secondary); font-size:0.84rem; font-weight:600;" onclick="toggleAuthModeFromHint()">Already have an account? Sign in</button>
+                </div>
+            </div>
+
+            <div id="otpStep" style="display:none;">
+                <div style="text-align:center;">
+                    <div style="font-size:3rem; margin-bottom:12px;">&#9993;</div>
+                    <p style="font-size:0.76rem; letter-spacing:0.16em; text-transform:uppercase; color:var(--secondary); font-weight:700; margin-bottom:8px;">Verification</p>
+                    <h2 id="otpTitle" style="font-size:1.35rem; font-weight:800; margin-bottom:8px;">Enter the 6-digit code</h2>
+                    <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:8px;">We sent a secure login code to <strong id="otpEmail" style="color:var(--primary);">member@example.com</strong>.</p>
+                    <p style="color:var(--text-tertiary); font-size:0.8rem; margin-bottom:20px;">Enter the 6-digit code from your email to continue.</p>
+                </div>
+
+                <div class="otp-group" id="otpGroup">
+                    <input type="text" maxlength="1" inputmode="numeric" oninput="otpAutoTab(this,0)" onkeydown="otpBackspace(event,this,0)">
+                    <input type="text" maxlength="1" inputmode="numeric" oninput="otpAutoTab(this,1)" onkeydown="otpBackspace(event,this,1)">
+                    <input type="text" maxlength="1" inputmode="numeric" oninput="otpAutoTab(this,2)" onkeydown="otpBackspace(event,this,2)">
+                    <input type="text" maxlength="1" inputmode="numeric" oninput="otpAutoTab(this,3)" onkeydown="otpBackspace(event,this,3)">
+                    <input type="text" maxlength="1" inputmode="numeric" oninput="otpAutoTab(this,4)" onkeydown="otpBackspace(event,this,4)">
+                    <input type="text" maxlength="1" inputmode="numeric" oninput="otpAutoTab(this,5)" onkeydown="otpBackspace(event,this,5)">
+                </div>
+
+                <div id="otpError" style="display:none; background:var(--primary-soft); color:var(--primary); padding:10px 16px; border-radius:var(--radius-sm); font-size:0.85rem; font-weight:600; margin-bottom:16px; text-align:center;"></div>
+
+                <button type="button" class="btn-primary" style="width:100%; padding:16px;" onclick="verifyOTP()" id="verifyOTPBtn">
+                    <span>Verify and Continue</span>
+                </button>
+
+                <div style="text-align:center; margin-top:20px;">
+                    <button type="button" style="background:none; color:var(--text-secondary); font-size:0.85rem; font-weight:500;" onclick="returnToWizard()">Back to details</button>
+                    <span style="color:var(--text-tertiary); margin:0 8px;">|</span>
+                    <button type="button" id="resendBtn" style="background:none; color:var(--secondary); font-size:0.85rem; font-weight:600;" onclick="resendOTP()">Resend code</button>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top:40px; text-align:center;">
+            <p style="font-size:0.75rem; color:var(--text-tertiary);">By continuing, you agree to our Terms and Privacy Policy.</p>
+        </div>
+    </div>
+</div>
+
+<div id="toastContainer" class="toast-container"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../shared-supabase-client.js"></script>
+<script src="../shared-entry-bridge.js"></script>
+<script src="app.js"></script>
+<script>
+    renderAmbientBg();
+
+    const CREATE_FIELDS = [
+        {
+            key: 'name',
+            eyebrow: 'Create Account',
+            title: 'What should we call you?',
+            description: 'This name appears in your membership, reviews, and gym activity.',
+            type: 'text',
+            placeholder: 'Your full name',
+            autocomplete: 'name',
+            validate(value) {
+                return value.trim().length >= 2 ? '' : 'Enter your full name to continue.';
+            }
+        },
+        {
+            key: 'phone',
+            eyebrow: 'Contact',
+            title: 'What is your phone number?',
+            description: 'Your phone helps us link memberships, attendance, and live entry approvals.',
+            type: 'phone',
+            placeholder: '9876543210',
+            autocomplete: 'tel',
+            validate(value) {
+                return /^\d{10}$/.test(value) ? '' : 'Enter a valid 10-digit phone number.';
+            }
+        },
+        {
+            key: 'email',
+            eyebrow: 'Account',
+            title: 'Which email should we use?',
+            description: 'We send your secure sign-in code to this email.',
+            type: 'email',
+            placeholder: 'you@example.com',
+            autocomplete: 'email',
+            validate(value) {
+                return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? '' : 'Enter a valid email address.';
+            }
+        },
+        {
+            key: 'age',
+            eyebrow: 'Profile',
+            title: 'How old are you?',
+            description: 'Age helps keep your member profile complete and useful.',
+            type: 'number',
+            placeholder: '22',
+            inputMode: 'numeric',
+            validate(value) {
+                const parsed = Number.parseInt(value, 10);
+                return Number.isFinite(parsed) && parsed >= 13 && parsed <= 100 ? '' : 'Enter a valid age between 13 and 100.';
+            }
+        },
+        {
+            key: 'location',
+            eyebrow: 'Location',
+            title: 'Where do you live?',
+            description: 'We use this to personalize nearby gyms and store your home location in your account.',
+            type: 'text',
+            placeholder: 'Mumbai, Maharashtra',
+            autocomplete: 'address-level2',
+            validate(value) {
+                return value.trim().length >= 2 ? '' : 'Enter your city or area to continue.';
+            }
+        }
+    ];
+
+    const SIGNIN_FIELDS = [
+        {
+            key: 'email',
+            eyebrow: 'Sign In',
+            title: 'What email do you use?',
+            description: 'We will send a secure sign-in code to your existing member account.',
+            type: 'email',
+            placeholder: 'you@example.com',
+            autocomplete: 'email',
+            validate(value) {
+                return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? '' : 'Enter a valid email address.';
+            }
+        }
+    ];
+
+    let authMode = 'create';
+    let currentStepIndex = 0;
+    let formState = {
+        name: '',
+        phone: '',
+        email: '',
+        age: '',
+        location: ''
+    };
+    const AUTH_FLOW_STORAGE_KEY = 'superfit_auth_flow_v1';
+    const RESEND_COOLDOWN_MS = 60 * 1000;
+    let resendCooldownTimer = null;
+
+    function isHostedAuthContext() {
+        return /^https?:$/i.test(window.location.protocol);
+    }
+
+    function normalizeEmail(value) {
+        return String(value || '').trim().toLowerCase();
+    }
+
+    function normalizePhone(value) {
+        return String(value || '').replace(/[^0-9]/g, '').slice(-10);
+    }
+
+    function normalizeAge(value) {
+        const parsed = Number.parseInt(String(value || '').trim(), 10);
+        return Number.isFinite(parsed) ? String(parsed) : '';
+    }
+
+    function normalizeLocation(value) {
+        return String(value || '').trim();
+    }
+
+    function getSupabaseAuthClient() {
+        if (typeof window.getFitConnectSupabase === 'function') {
+            return window.getFitConnectSupabase();
+        }
+        return window.supabaseAPI || null;
+    }
+
+    function getDefaultAuthFlowState() {
+        return {
+            mode: 'create',
+            stepIndex: 0,
+            otpVisible: false,
+            resendAvailableAt: 0,
+            formState: {
+                name: '',
+                phone: '',
+                email: '',
+                age: '',
+                location: ''
+            }
+        };
+    }
+
+    function sanitizeAuthFlowState(rawState) {
+        const defaults = getDefaultAuthFlowState();
+        const nextState = Object.assign({}, defaults, rawState || {});
+        const nextFormState = Object.assign({}, defaults.formState, nextState.formState || {});
+
+        nextState.mode = nextState.mode === 'signin' ? 'signin' : 'create';
+        nextFormState.name = String(nextFormState.name || '').trim();
+        nextFormState.phone = normalizePhone(nextFormState.phone);
+        nextFormState.email = normalizeEmail(nextFormState.email);
+        nextFormState.age = normalizeAge(nextFormState.age);
+        nextFormState.location = normalizeLocation(nextFormState.location);
+        nextState.formState = nextFormState;
+
+        const maxStepIndex = (nextState.mode === 'create' ? CREATE_FIELDS.length : SIGNIN_FIELDS.length) - 1;
+        nextState.stepIndex = Math.min(Math.max(Number.parseInt(nextState.stepIndex, 10) || 0, 0), maxStepIndex);
+        nextState.otpVisible = !!nextState.otpVisible && !!nextFormState.email;
+        nextState.resendAvailableAt = Math.max(0, Number.parseInt(nextState.resendAvailableAt, 10) || 0);
+
+        return nextState;
+    }
+
+    function readAuthFlowState() {
+        try {
+            return sanitizeAuthFlowState(JSON.parse(localStorage.getItem(AUTH_FLOW_STORAGE_KEY) || 'null'));
+        } catch (error) {
+            return getDefaultAuthFlowState();
+        }
+    }
+
+    function persistAuthFlowState(extraState) {
+        const nextState = sanitizeAuthFlowState(Object.assign({}, {
+            mode: authMode,
+            stepIndex: currentStepIndex,
+            otpVisible: document.getElementById('otpStep').style.display === 'block',
+            formState: formState
+        }, extraState || {}));
+
+        authMode = nextState.mode;
+        currentStepIndex = nextState.stepIndex;
+        formState = Object.assign({}, nextState.formState);
+        localStorage.setItem(AUTH_FLOW_STORAGE_KEY, JSON.stringify(nextState));
+        return nextState;
+    }
+
+    function clearAuthFlowState() {
+        localStorage.removeItem(AUTH_FLOW_STORAGE_KEY);
+    }
+
+    function formatResendCooldown(msRemaining) {
+        const seconds = Math.max(0, Math.ceil(msRemaining / 1000));
+        return seconds + 's';
+    }
+
+    function stopResendCooldownTimer() {
+        if (resendCooldownTimer) {
+            clearInterval(resendCooldownTimer);
+            resendCooldownTimer = null;
+        }
+    }
+
+    function updateResendButton() {
+        const resendBtn = document.getElementById('resendBtn');
+        if (!resendBtn) return;
+
+        const flowState = readAuthFlowState();
+        const msRemaining = flowState.resendAvailableAt - Date.now();
+        if (msRemaining > 0) {
+            resendBtn.disabled = true;
+            resendBtn.style.opacity = '0.7';
+            resendBtn.textContent = 'Resend in ' + formatResendCooldown(msRemaining);
+            return;
+        }
+
+        resendBtn.disabled = false;
+        resendBtn.style.opacity = '1';
+        resendBtn.textContent = 'Resend code';
+    }
+
+    function startResendCooldown() {
+        persistAuthFlowState({ resendAvailableAt: Date.now() + RESEND_COOLDOWN_MS });
+        updateResendButton();
+        stopResendCooldownTimer();
+        resendCooldownTimer = window.setInterval(() => {
+            updateResendButton();
+            if (readAuthFlowState().resendAvailableAt <= Date.now()) {
+                stopResendCooldownTimer();
+            }
+        }, 1000);
+    }
+
+    function getFieldsForMode() {
+        return authMode === 'create' ? CREATE_FIELDS : SIGNIN_FIELDS;
+    }
+
+    function getCurrentField() {
+        return getFieldsForMode()[currentStepIndex];
+    }
+
+    function getRedirectParam() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('redirect');
+    }
+
+    function resolveSafeRedirect() {
+        const raw = (getRedirectParam() || 'index.html').trim();
+        if (!raw) return 'index.html';
+        if (/^(?:[a-z]+:)?\/\//i.test(raw) || /^javascript:/i.test(raw) || raw.startsWith('/') || raw.includes('..') || raw.startsWith('#')) {
+            return 'index.html';
+        }
+        return raw;
+    }
+
+    function getHostedRedirectUrl() {
+        return new URL(resolveSafeRedirect(), window.location.href).toString();
+    }
+
+    function maskEmail(email) {
+        const normalized = normalizeEmail(email);
+        const parts = normalized.split('@');
+        if (parts.length !== 2) return normalized;
+        const local = parts[0];
+        const domain = parts[1];
+        return local.slice(0, Math.min(2, local.length)) + '***@' + domain;
+    }
+
+    function showError(boxId, message) {
+        const box = document.getElementById(boxId);
+        if (!box) return;
+        box.textContent = message;
+        box.style.display = 'block';
+    }
+
+    function clearError(boxId) {
+        const box = document.getElementById(boxId);
+        if (!box) return;
+        box.textContent = '';
+        box.style.display = 'none';
+    }
+
+    function setButtonBusy(buttonId, text, isBusy) {
+        const button = document.getElementById(buttonId);
+        if (!button) return;
+        if (!button.dataset.defaultHtml) {
+            button.dataset.defaultHtml = button.innerHTML;
+        }
+        button.disabled = !!isBusy;
+        button.style.opacity = isBusy ? '0.75' : '1';
+        button.innerHTML = isBusy ? '<span>' + text + '</span>' : button.dataset.defaultHtml;
+    }
+
+    function updateModeUI() {
+        const signInBtn = document.getElementById('signInModeBtn');
+        const createBtn = document.getElementById('createModeBtn');
+        const isCreate = authMode === 'create';
+
+        signInBtn.classList.toggle('active', !isCreate);
+        createBtn.classList.toggle('active', isCreate);
+
+        document.getElementById('modeHintBtn').textContent = isCreate
+            ? 'Already have an account? Sign in'
+            : 'Need a new member account? Create one';
+    }
+
+    function renderProgressDots(total, activeIndex) {
+        const shell = document.getElementById('stepProgress');
+        shell.innerHTML = '';
+        for (let index = 0; index < total; index += 1) {
+            const dot = document.createElement('div');
+            dot.style.flex = '1';
+            dot.style.height = '6px';
+            dot.style.borderRadius = '999px';
+            dot.style.background = index <= activeIndex ? 'linear-gradient(90deg, var(--primary), var(--primary-dark))' : 'rgba(255,255,255,0.08)';
+            shell.appendChild(dot);
+        }
+    }
+
+    function renderFieldShell() {
+        const field = getCurrentField();
+        const shell = document.getElementById('fieldShell');
+        const totalSteps = getFieldsForMode().length;
+        const stepCounter = document.getElementById('stepCounter');
+        const backBtn = document.getElementById('backBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        document.getElementById('stepEyebrow').textContent = field.eyebrow;
+        document.getElementById('stepTitle').textContent = field.title;
+        document.getElementById('stepDescription').textContent = field.description;
+        stepCounter.textContent = (currentStepIndex + 1) + ' / ' + totalSteps;
+        backBtn.style.display = currentStepIndex > 0 ? 'inline-flex' : 'none';
+        nextBtn.innerHTML = '<span>' + (currentStepIndex === totalSteps - 1 ? 'Send Email Code' : 'Continue') + '</span>';
+
+        renderProgressDots(totalSteps, currentStepIndex);
+
+        if (field.type === 'phone') {
+            shell.innerHTML = [
+                '<label style="font-size:0.8rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:10px;">Phone Number</label>',
+                '<div style="display:flex; gap:8px;">',
+                '<div style="padding:14px 12px; background:var(--bg-input); border:1px solid var(--border-glass); border-radius:var(--radius-md); color:var(--text-secondary); font-size:0.95rem; font-weight:600; white-space:nowrap;">+91</div>',
+                '<input type="tel" id="wizardInput" class="input-glass" placeholder="' + field.placeholder + '" maxlength="10" autocomplete="' + field.autocomplete + '" inputmode="numeric" style="flex:1;">',
+                '</div>'
+            ].join('');
+        } else {
+            shell.innerHTML = [
+                '<label style="font-size:0.8rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:10px;">',
+                field.title,
+                '</label>',
+                '<input type="' + field.type + '" id="wizardInput" class="input-glass" placeholder="' + field.placeholder + '" autocomplete="' + (field.autocomplete || 'off') + '"' + (field.inputMode ? ' inputmode="' + field.inputMode + '"' : '') + '>'
+            ].join('');
+        }
+
+        const input = document.getElementById('wizardInput');
+        input.value = formState[field.key] || '';
+        input.focus();
+        input.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                goNextStep();
+            }
+        });
+        input.addEventListener('input', function() {
+            clearError('wizardError');
+            if (field.key === 'phone') {
+                input.value = normalizePhone(input.value);
+            } else if (field.key === 'email') {
+                input.value = normalizeEmail(input.value);
+            } else if (field.key === 'age') {
+                input.value = normalizeAge(input.value);
+            }
+            formState[field.key] = input.value;
+            persistAuthFlowState({ otpVisible: false });
+        });
+    }
+
+    function readCurrentFieldValue() {
+        const field = getCurrentField();
+        const input = document.getElementById('wizardInput');
+        if (!input) return '';
+
+        let value = input.value || '';
+        if (field.key === 'phone') value = normalizePhone(value);
+        if (field.key === 'email') value = normalizeEmail(value);
+        if (field.key === 'age') value = normalizeAge(value);
+        if (field.key === 'location') value = normalizeLocation(value);
+        if (field.key === 'name') value = value.trim();
+
+        return value;
+    }
+
+    function persistCurrentField() {
+        const field = getCurrentField();
+        const value = readCurrentFieldValue();
+        const validationError = field.validate(value);
+
+        if (validationError) {
+            showError('wizardError', validationError);
+            return false;
+        }
+
+        formState[field.key] = value;
+        clearError('wizardError');
+        persistAuthFlowState({ otpVisible: false });
+        return true;
+    }
+
+    function switchMode(mode) {
+        stopResendCooldownTimer();
+        authMode = mode === 'signin' ? 'signin' : 'create';
+        currentStepIndex = 0;
+        clearError('wizardError');
+        clearError('otpError');
+        updateModeUI();
+        document.getElementById('otpStep').style.display = 'none';
+        document.getElementById('wizardStep').style.display = 'block';
+        persistAuthFlowState({ otpVisible: false });
+        renderFieldShell();
+    }
+
+    function toggleAuthModeFromHint() {
+        switchMode(authMode === 'create' ? 'signin' : 'create');
+    }
+
+    async function goNextStep() {
+        if (!persistCurrentField()) return;
+
+        const totalSteps = getFieldsForMode().length;
+        if (currentStepIndex < totalSteps - 1) {
+            currentStepIndex += 1;
+            persistAuthFlowState({ otpVisible: false });
+            renderFieldShell();
+            return;
+        }
+
+        await sendAuthCode();
+    }
+
+    function goBackStep() {
+        if (currentStepIndex === 0) return;
+        currentStepIndex -= 1;
+        clearError('wizardError');
+        persistAuthFlowState({ otpVisible: false });
+        renderFieldShell();
+    }
+
+    async function sendAuthCode() {
+        clearError('wizardError');
+
+        if (!isHostedAuthContext()) {
+            showError('wizardError', 'Open the user app from http://localhost:8088 or your deployed web URL so Supabase auth can work.');
+            return;
+        }
+
+        const client = getSupabaseAuthClient();
+        if (!client || !client.auth) {
+            showError('wizardError', 'Supabase auth is unavailable right now.');
+            return;
+        }
+
+        const email = normalizeEmail(formState.email);
+        const shouldCreateUser = authMode === 'create';
+        const payload = {
+            email: email,
+            options: {
+                emailRedirectTo: getHostedRedirectUrl(),
+                shouldCreateUser: shouldCreateUser,
+                data: shouldCreateUser ? {
+                    full_name: formState.name,
+                    name: formState.name,
+                    phone: formState.phone,
+                    age: Number.parseInt(formState.age, 10),
+                    location: formState.location,
+                    role: 'member'
+                } : undefined
+            }
+        };
+
+        if (typeof window.cachePendingUserProfile === 'function') {
+            window.cachePendingUserProfile({
+                name: formState.name,
+                phone: formState.phone,
+                email: formState.email,
+                age: formState.age,
+                location: formState.location
+            });
+        }
+
+        setButtonBusy('nextBtn', 'Sending code...', true);
+
+        try {
+            const result = await client.auth.signInWithOtp(payload);
+            if (result.error) {
+                showError('wizardError', result.error.message);
+                return;
+            }
+
+            document.getElementById('otpTitle').textContent = shouldCreateUser ? 'Verify your new account' : 'Verify your sign-in';
+            document.getElementById('otpEmail').textContent = maskEmail(email);
+            document.getElementById('wizardStep').style.display = 'none';
+            document.getElementById('otpStep').style.display = 'block';
+            persistAuthFlowState({ otpVisible: true });
+            startResendCooldown();
+            document.querySelectorAll('#otpGroup input').forEach(input => {
+                input.value = '';
+            });
+            setTimeout(() => {
+                const firstInput = document.querySelector('#otpGroup input');
+                if (firstInput) firstInput.focus();
+            }, 100);
+            showToast((shouldCreateUser ? 'Verification code sent to ' : 'Sign-in code sent to ') + email, 'info');
+        } catch (error) {
+            showError('wizardError', shouldCreateUser
+                ? 'Could not create the account right now. Please try again.'
+                : 'Could not send the sign-in code right now. Please try again.');
+        } finally {
+            setButtonBusy('nextBtn', '', false);
+        }
+    }
+
+    function otpAutoTab(input, index) {
+        input.value = input.value.replace(/[^0-9]/g, '');
+        if (input.value.length === 1) {
+            const inputs = document.querySelectorAll('#otpGroup input');
+            if (index < inputs.length - 1) {
+                inputs[index + 1].focus();
+            }
+        }
+    }
+
+    function otpBackspace(event, input, index) {
+        if (event.key === 'Backspace' && !input.value && index > 0) {
+            const inputs = document.querySelectorAll('#otpGroup input');
+            inputs[index - 1].focus();
+        }
+    }
+
+    function getOtpValue() {
+        return Array.from(document.querySelectorAll('#otpGroup input')).map(input => input.value).join('');
+    }
+
+    function returnToWizard() {
+        stopResendCooldownTimer();
+        document.getElementById('otpStep').style.display = 'none';
+        document.getElementById('wizardStep').style.display = 'block';
+        clearError('otpError');
+        persistAuthFlowState({ otpVisible: false });
+        renderFieldShell();
+    }
+
+    async function verifyOTP() {
+        clearError('otpError');
+        const otp = getOtpValue();
+
+        if (!/^\d{6}$/.test(otp)) {
+            showError('otpError', 'Enter the 6-digit code from your email.');
+            document.getElementById('otpGroup').style.animation = 'none';
+            document.getElementById('otpGroup').offsetHeight;
+            document.getElementById('otpGroup').style.animation = 'shake 0.4s ease';
+            return;
+        }
+
+        setButtonBusy('verifyOTPBtn', 'Verifying...', true);
+
+        try {
+            const client = getSupabaseAuthClient();
+            const result = await client.auth.verifyOtp({
+                email: normalizeEmail(formState.email),
+                token: otp,
+                type: 'email'
+            });
+
+            if (result.error) {
+                showError('otpError', result.error.message);
+                return;
+            }
+
+            if (typeof window.cachePendingUserProfile === 'function') {
+                window.cachePendingUserProfile({
+                    name: formState.name,
+                    phone: formState.phone,
+                    email: formState.email,
+                    age: formState.age,
+                    location: formState.location
+                });
+            }
+
+            if (authMode === 'create') {
+                await client.auth.updateUser({
+                    data: {
+                        full_name: formState.name,
+                        name: formState.name,
+                        phone: formState.phone,
+                        age: Number.parseInt(formState.age, 10),
+                        location: formState.location,
+                        role: 'member'
+                    }
+                });
+            }
+
+            let hydratedUser = null;
+            if (typeof window.hydrateUserFromAuthSession === 'function') {
+                hydratedUser = await window.hydrateUserFromAuthSession({ force: true });
+            }
+
+            if (!hydratedUser) {
+                saveUserData({
+                    name: formState.name || '',
+                    phone: formState.phone || '',
+                    email: formState.email || '',
+                    age: Number.parseInt(formState.age || '', 10) || null,
+                    location: formState.location || '',
+                    joinDate: new Date().toISOString(),
+                    membership: null
+                });
+            }
+
+            showToast(authMode === 'create'
+                ? 'Account created and signed in successfully.'
+                : 'Signed in successfully.', 'success');
+            stopResendCooldownTimer();
+            clearAuthFlowState();
+            window.location.href = resolveSafeRedirect();
+        } catch (error) {
+            showError('otpError', 'Could not verify the code right now. Please try again.');
+        } finally {
+            setButtonBusy('verifyOTPBtn', '', false);
+        }
+    }
+
+    async function resendOTP() {
+        clearError('otpError');
+        updateResendButton();
+        if (readAuthFlowState().resendAvailableAt > Date.now()) {
+            showError('otpError', 'Wait a bit before requesting another code.');
+            return;
+        }
+        setButtonBusy('resendBtn', 'Sending...', true);
+
+        try {
+            const client = getSupabaseAuthClient();
+            const result = await client.auth.signInWithOtp({
+                email: normalizeEmail(formState.email),
+                options: {
+                    emailRedirectTo: getHostedRedirectUrl(),
+                    shouldCreateUser: authMode === 'create',
+                    data: authMode === 'create' ? {
+                        full_name: formState.name,
+                        name: formState.name,
+                        phone: formState.phone,
+                        age: Number.parseInt(formState.age, 10),
+                        location: formState.location,
+                        role: 'member'
+                    } : undefined
+                }
+            });
+
+            if (result.error) {
+                showError('otpError', result.error.message);
+                return;
+            }
+
+            startResendCooldown();
+            showToast('A fresh code is on the way.', 'info');
+        } catch (error) {
+            showError('otpError', 'Could not resend the code right now.');
+        } finally {
+            setButtonBusy('resendBtn', '', false);
+        }
+    }
+
+    async function bootstrapLoginPage() {
+        const authContextNote = document.getElementById('authContextNote');
+        if (!isHostedAuthContext()) {
+            authContextNote.textContent = 'Supabase auth works from http://localhost:8088 or your deployed web URL.';
+            authContextNote.style.display = 'block';
+        }
+
+        const flowState = readAuthFlowState();
+        authMode = flowState.mode;
+        currentStepIndex = flowState.stepIndex;
+        formState = Object.assign({}, formState, flowState.formState);
+
+        const storedUser = getUserData();
+        if (storedUser) {
+            formState = Object.assign({}, formState, {
+                name: storedUser.name || '',
+                phone: storedUser.phone || '',
+                email: storedUser.email || '',
+                age: storedUser.age ? String(storedUser.age) : '',
+                location: storedUser.location || ''
+            });
+        }
+
+        if (typeof readPendingUserProfile === 'function') {
+            const pending = readPendingUserProfile();
+            if (pending) {
+                formState = Object.assign({}, formState, {
+                    name: pending.name || formState.name,
+                    phone: pending.phone || formState.phone,
+                    email: pending.email || formState.email,
+                    age: pending.age ? String(pending.age) : formState.age,
+                    location: pending.location || formState.location
+                });
+            }
+        }
+
+        if (typeof window.hydrateUserFromAuthSession === 'function') {
+            const user = await window.hydrateUserFromAuthSession({ force: true });
+            if (user && user.authUserId) {
+                window.location.href = resolveSafeRedirect();
+                return;
+            }
+        } else if (isLoggedIn()) {
+            window.location.href = resolveSafeRedirect();
+            return;
+        }
+
+        updateModeUI();
+        if (flowState.otpVisible && formState.email) {
+            document.getElementById('wizardStep').style.display = 'none';
+            document.getElementById('otpStep').style.display = 'block';
+            document.getElementById('otpTitle').textContent = authMode === 'create' ? 'Verify your new account' : 'Verify your sign-in';
+            document.getElementById('otpEmail').textContent = maskEmail(formState.email);
+            persistAuthFlowState({ otpVisible: true });
+            updateResendButton();
+            if (flowState.resendAvailableAt > Date.now()) {
+                startResendCooldown();
+            }
+            const firstInput = document.querySelector('#otpGroup input');
+            if (firstInput) firstInput.focus();
+        } else {
+            document.getElementById('otpStep').style.display = 'none';
+            document.getElementById('wizardStep').style.display = 'block';
+            persistAuthFlowState({ otpVisible: false });
+            renderFieldShell();
+        }
+    }
+
+    bootstrapLoginPage().catch(error => {
+        console.warn('Login bootstrap failed', error);
+        updateModeUI();
+        renderFieldShell();
+    });
+</script>
+
+<style>
+    .auth-mode-btn {
+        background: transparent;
+        color: var(--text-secondary);
+        transition: all 0.2s ease;
+    }
+
+    .auth-mode-btn.active {
+        background: linear-gradient(135deg, rgba(255,90,95,0.92), rgba(255,107,122,0.88));
+        color: white;
+        box-shadow: 0 10px 26px rgba(255,90,95,0.24);
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-8px); }
+        50% { transform: translateX(8px); }
+        75% { transform: translateX(-8px); }
+    }
+</style>
+
+</body>
+</html>
