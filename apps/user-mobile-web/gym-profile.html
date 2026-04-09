@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gym Profile - SuperFit</title>
+    <meta name="description" content="View gym details, photos, pricing, reviews, and claim your free trial on SuperFit.">
+    <link rel="stylesheet" href="styles.css?v=20260408-entry">
+</head>
+<body>
+
+<div class="app-container" id="gymProfileApp">
+    <!-- Populated by JS -->
+</div>
+
+<!-- Cart FAB -->
+<button class="cart-fab hidden" id="cartFab" onclick="window.location.href='store.html'">
+    Cart <span class="cart-count">0</span>
+</button>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="toast-container"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../shared-supabase-client.js"></script>
+<script src="../shared-entry-bridge.js"></script>
+<script src="app.js"></script>
+<script>
+    initApp('explore');
+
+    const gymId = getParam('id');
+    let gym = null;
+    let selectedStars = 0;
+    bootGymProfile();
+
+    async function bootGymProfile() {
+        try {
+            await warmCloudState();
+        } catch (error) {
+            console.warn('Gym profile warm-up failed', error);
+        }
+
+        gym = getGymById(gymId) || getGymById(decodeURIComponent(gymId || ''));
+        if (!gym) {
+            document.getElementById('gymProfileApp').innerHTML =
+                '<div class="empty-state" style="margin-top:100px;">' +
+                    '<div class="empty-icon">?</div>' +
+                    '<div class="empty-title">Gym not found</div>' +
+                    '<div class="empty-desc">This gym does not exist or the link is broken.</div>' +
+                    '<br><a href="index.html" class="btn-primary">Back to Explore</a>' +
+                '</div>';
+            return;
+        }
+
+        renderGymProfile(gym);
+    }
+
+    function escapeHtml(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function formatMembershipDate(value) {
+        if (!value) return '';
+        return new Date(value).toLocaleDateString('en-IN', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+        });
+    }
+
+    function getSelectedPlan() {
+        const selectedIndex = typeof window.__selectedGymPlanIndex === 'number' ? window.__selectedGymPlanIndex : 0;
+        return (gym.plans || [])[selectedIndex] || null;
+    }
+
+    function getMembershipNotice(g) {
+        const membership = getCurrentMembership();
+        const state = getGymMembershipState(g);
+
+        if (state === 'active_here' && membership) {
+            return {
+                tone: 'secondary',
+                title: 'Membership active',
+                body: membership.plan + ' is active until ' + formatMembershipDate(membership.expiryDate) + '. Use My Gym to request and manage your live entry code.'
+            };
+        }
+
+        if (state === 'expired_here' && membership) {
+            return {
+                tone: 'warning',
+                title: 'Membership expired',
+                body: 'Your last plan ended on ' + formatMembershipDate(membership.expiryDate) + '. Select a plan below to renew access.'
+            };
+        }
+
+        if (state === 'active_elsewhere' && membership) {
+            return {
+                tone: 'primary',
+                title: 'Membership active at another gym',
+                body: 'You currently have an active plan at ' + membership.gymName + '. Finish or switch that plan before joining here.'
+            };
+        }
+
+        if (hasClaimedTrial(g.id)) {
+            return {
+                tone: 'primary',
+                title: 'Free trial already used',
+                body: 'Your free trial for this gym has already been used. Pick a paid plan below to continue.'
+            };
+        }
+
+        return {
+            tone: 'accent',
+            title: 'Choose the plan that fits you',
+            body: 'Free trial is for first-time visits. Paid plans unlock repeat entry requests and attendance tracking.'
+        };
+    }
+
+    function getPrimaryPlanState(g, plan) {
+        if (!plan) {
+            return {
+                label: 'Select a Plan',
+                disabled: true,
+                helper: 'Choose a plan to continue.'
+            };
+        }
+
+        const membershipState = getGymMembershipState(g);
+        const membership = getCurrentMembership();
+        const isFreePlan = Number(plan.price) === 0;
+
+        if (membershipState === 'active_elsewhere') {
+            return {
+                label: 'Finish Current Membership First',
+                disabled: true,
+                helper: 'You already have an active plan at ' + membership.gymName + '.'
+            };
+        }
+
+        if (isFreePlan) {
+            if (!g.trialAvailable) {
+                return {
+                    label: 'Trial Unavailable',
+                    disabled: true,
+                    helper: 'This gym does not offer a free trial right now.'
+                };
+            }
+
+            if (hasClaimedTrial(g.id)) {
+                return {
+                    label: 'Free Trial Already Used',
+                    disabled: true,
+                    helper: 'Pick a paid plan to continue with this gym.'
+                };
+            }
+
+            if (membershipState === 'active_here' && membership && String(membership.plan) === String(plan.name) && isMembershipActive(membership)) {
+                return {
+                    label: 'Trial Already Active',
+                    disabled: true,
+                    helper: 'Your trial is already running for this gym.'
+                };
+            }
+
+            return {
+                label: 'Claim 3-Day Free Trial',
+                disabled: false,
+                action: 'trial',
+                helper: 'One-time trial. Great for your first visit.'
+            };
+        }
+
+        if (membershipState === 'active_here' && membership && String(membership.plan) === String(plan.name) && isMembershipActive(membership)) {
+            return {
+                label: 'Current Plan Active',
+                disabled: true,
+                helper: 'You are already on this plan.'
+            };
+        }
+
+        if (membershipState === 'expired_here') {
+            return {
+                label: 'Renew with ' + plan.name,
+                disabled: false,
+                action: 'join',
+                helper: 'Resume access at this gym with the selected plan.'
+            };
+        }
+
+        if (membershipState === 'active_here') {
+            return {
+                label: 'Switch to ' + plan.name,
+                disabled: false,
+                action: 'join',
+                helper: 'Switch your active plan at this gym.'
+            };
+        }
+
+        return {
+            label: 'Join ' + plan.name,
+            disabled: false,
+            action: 'join',
+            helper: 'Membership starts immediately after joining.'
+        };
+    }
+
+    function renderGymProfile(g) {
+        gym = g;
+        const currentTrackKey = String(g.supabaseGymId || g.id || '');
+        if (window.__trackedGymProfileView !== currentTrackKey && typeof trackGymActivity === 'function') {
+            window.__trackedGymProfileView = currentTrackKey;
+            trackGymActivity(g, 'Viewed Profile', {
+                source: 'gym-profile'
+            }).catch(error => console.warn('Profile view sync failed', error));
+        }
+        if (typeof window.__selectedGymPlanIndex !== 'number') {
+            window.__selectedGymPlanIndex = Math.max(0, g.plans.findIndex(plan => plan.popular));
+        }
+
+        const reviewSummary = getGymReviewSummary(g);
+        const reviews = getAllReviewsForGym(g);
+        const selectedPlan = getSelectedPlan() || g.plans[0];
+        const membership = getCurrentMembership();
+        const membershipState = getGymMembershipState(g);
+        const membershipNotice = getMembershipNotice(g);
+        const primaryPlanState = getPrimaryPlanState(g, selectedPlan);
+
+        let currentPhoto = 0;
+
+        let html = '';
+        html += '<div style="position:sticky;top:0;z-index:100;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(180deg,var(--bg-deep),rgba(7,8,13,0.8));backdrop-filter:blur(20px);">';
+        html += '<button class="btn-icon btn-icon-text" onclick="history.back()">Back</button>';
+        html += '<div style="display:flex;gap:8px;">';
+        html += '<button class="btn-icon btn-icon-text" onclick="toggleFavProfile()" id="favBtn">' + (isFavorite(g.id) ? 'Saved' : 'Save') + '</button>';
+        html += '<button class="btn-icon btn-icon-text" onclick="shareGym()">Share</button>';
+        html += '</div></div>';
+
+        html += '<div class="content-padding" style="margin-bottom:20px;">';
+        html += '<div class="photo-carousel" id="photoCarousel">';
+        html += '<img src="' + escapeHtml(g.photos[0]) + '" alt="' + escapeHtml(g.name) + '" id="carouselImg">';
+        html += '<div class="photo-dots">';
+        g.photos.forEach((photo, index) => {
+            html += '<button class="dot' + (index === 0 ? ' active' : '') + '" onclick="goToPhoto(' + index + ')"></button>';
+        });
+        html += '</div></div></div>';
+
+        html += '<div class="content-padding">';
+        html += '<div style="display:flex;align-items:start;justify-content:space-between;gap:12px;margin-bottom:4px;">';
+        html += '<h1 style="font-size:1.6rem;font-weight:900;">' + escapeHtml(g.name) + '</h1>';
+        html += '<div class="badge badge-primary" style="font-size:0.85rem;padding:6px 14px;">Rating ' + reviewSummary.rating.toFixed(1) + '</div>';
+        html += '</div>';
+        html += '<p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:4px;">' + escapeHtml(g.tagline) + '</p>';
+        html += '<p style="color:var(--text-tertiary);font-size:0.82rem;margin-bottom:16px;">' + escapeHtml(g.location) + ' · ' + escapeHtml(g.distance) + ' · ' + escapeHtml(String(g.memberCount)) + ' members</p>';
+        html += '<p style="color:var(--text-secondary);font-size:0.9rem;line-height:1.6;margin-bottom:20px;">' + escapeHtml(g.description) + '</p>';
+
+        html += '<div style="display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap;">';
+        html += '<div class="glass-card-static" style="padding:12px 16px;flex:1;min-width:100px;text-align:center;"><div style="font-size:1.2rem;margin-bottom:4px;">Hours</div><div style="font-size:0.78rem;color:var(--text-secondary);">' + escapeHtml(g.hours) + '</div></div>';
+        html += '<div class="glass-card-static" style="padding:12px 16px;flex:1;min-width:100px;text-align:center;"><div style="font-size:1.2rem;margin-bottom:4px;">Call</div><div style="font-size:0.78rem;color:var(--text-secondary);">' + escapeHtml(g.phone) + '</div></div>';
+        html += '<div class="glass-card-static" style="padding:12px 16px;flex:1;min-width:100px;text-align:center;"><div style="font-size:1.2rem;margin-bottom:4px;">Reviews</div><div style="font-size:0.78rem;color:var(--text-secondary);">' + reviewSummary.count + ' reviews</div></div>';
+        html += '</div>';
+
+        html += '<h2 class="section-title">Amenities</h2>';
+        html += '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px;">';
+        g.amenities.forEach(amenity => {
+            html += '<span class="amenity-tag">' + escapeHtml(amenity) + '</span>';
+        });
+        html += '</div>';
+
+        if (g.offers.length > 0) {
+            html += '<h2 class="section-title">Special Offers</h2>';
+            html += '</div><div class="scroll-row" style="margin-bottom:24px;">';
+            g.offers.forEach(offer => {
+                html += '<div class="offer-card ' + escapeHtml(offer.gradient) + '" style="min-width:260px;">';
+                html += '<div class="offer-title">' + escapeHtml(offer.title) + '</div>';
+                html += '<div class="offer-desc">' + escapeHtml(offer.desc) + '</div>';
+                html += '<span class="offer-code">Code: ' + escapeHtml(offer.code) + '</span>';
+                html += '</div>';
+            });
+            html += '</div><div class="content-padding">';
+        }
+
+        html += '<h2 class="section-title">Membership Plans</h2>';
+        html += '<div style="margin-bottom:20px;">';
+        g.plans.forEach((plan, index) => {
+            const isSelected = index === window.__selectedGymPlanIndex;
+            html += '<div class="plan-card' + (isSelected ? ' selected' : '') + '" onclick="selectPlan(' + index + ')">';
+            html += '<div class="plan-info">';
+            html += '<h4>' + escapeHtml(plan.name) + '</h4>';
+            html += '<span>' + escapeHtml(plan.duration);
+            if (plan.tag) html += ' · <span style="color:var(--secondary);font-weight:700;">' + escapeHtml(plan.tag) + '</span>';
+            if (plan.popular) html += ' · <span style="color:var(--primary);font-weight:700;">POPULAR</span>';
+            html += '</span></div>';
+            html += '<div class="plan-price"><div class="amount">' + (Number(plan.price) === 0 ? 'FREE' : '₹' + Number(plan.price).toLocaleString()) + '</div>';
+            if (Number(plan.price) !== 0) html += '<div class="period">/ ' + escapeHtml(plan.duration) + '</div>';
+            html += '</div></div>';
+        });
+        html += '</div>';
+
+        html += '<div class="glass-card-static profile-cta-card" style="padding:18px;margin-bottom:16px;">';
+        html += '<div class="badge badge-' + escapeHtml(membershipNotice.tone) + '" style="margin-bottom:12px;">' + escapeHtml(membershipNotice.title) + '</div>';
+        html += '<div style="font-size:0.9rem;line-height:1.6;color:var(--text-secondary);">' + escapeHtml(membershipNotice.body) + '</div>';
+        if (membershipState === 'active_here' && membership && isMembershipActive(membership)) {
+            html += '<div style="margin-top:14px;">';
+            html += '<a href="dashboard.html" class="btn-secondary" style="width:100%;display:inline-flex;padding:15px 16px;">Open My Gym</a>';
+            html += '</div>';
+        }
+        html += '</div>';
+
+        if (selectedPlan) {
+            html += '<div class="glass-card-static selected-plan-card" style="padding:16px;margin-bottom:14px;">';
+            html += '<div style="display:flex;align-items:start;justify-content:space-between;gap:14px;">';
+            html += '<div>';
+            html += '<div style="font-size:0.76rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:4px;">Selected plan</div>';
+            html += '<div style="font-size:1rem;font-weight:800;">' + escapeHtml(selectedPlan.name) + '</div>';
+            html += '<div style="font-size:0.84rem;color:var(--text-secondary);margin-top:4px;">' + escapeHtml(selectedPlan.duration) + (selectedPlan.tag ? ' · ' + escapeHtml(selectedPlan.tag) : '') + '</div>';
+            html += '</div>';
+            html += '<div style="text-align:right;">';
+            html += '<div style="font-size:1.2rem;font-weight:900;color:var(--secondary);">' + (Number(selectedPlan.price) === 0 ? 'FREE' : '₹' + Number(selectedPlan.price).toLocaleString()) + '</div>';
+            html += '<div style="font-size:0.74rem;color:var(--text-tertiary);">' + escapeHtml(primaryPlanState.helper || '') + '</div>';
+            html += '</div>';
+            html += '</div></div>';
+        }
+
+        html += '<div class="mobile-cta-stack" style="margin-bottom:12px;">';
+        html += '<button class="btn-primary" id="joinPlanBtn" style="width:100%;padding:16px;" onclick="handlePrimaryPlanAction()"' + (primaryPlanState.disabled ? ' disabled' : '') + '>' + escapeHtml(primaryPlanState.label) + '</button>';
+        html += '</div>';
+        html += '<div style="margin-bottom:32px;"></div>';
+
+        html += '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">';
+        html += '<h2 class="section-title" style="margin-bottom:12px;">Reviews (' + reviewSummary.count + ')</h2>';
+        html += '<div style="font-size:0.84rem;color:var(--text-secondary);">Avg ' + reviewSummary.rating.toFixed(1) + '/5</div>';
+        html += '</div>';
+
+        if (reviews.length === 0) {
+            html += '<div class="glass-card-static" style="padding:18px;margin-bottom:18px;text-align:center;color:var(--text-secondary);">No reviews yet. Be the first to share your experience.</div>';
+        } else {
+            reviews.forEach(review => {
+                html += '<div class="review-card">';
+                html += '<div class="review-header">';
+                html += '<div class="review-user">';
+                html += '<div class="review-avatar">' + escapeHtml(String(review.user || 'U').charAt(0).toUpperCase()) + '</div>';
+                html += '<div><div class="review-name">' + escapeHtml(review.user) + '</div><div class="review-date">' + escapeHtml(review.date) + '</div></div>';
+                html += '</div>';
+                html += renderStars(review.rating);
+                html += '</div>';
+                html += '<div class="review-text">' + escapeHtml(review.comment) + '</div>';
+                if (review.reply) {
+                    html += '<div class="review-reply"><div class="reply-label">' + escapeHtml(g.name) + ' replied</div><div class="reply-text">' + escapeHtml(review.reply) + '</div></div>';
+                }
+                html += '</div>';
+            });
+        }
+
+        html += '<div class="glass-card-static" style="padding:20px;margin-top:12px;margin-bottom:32px;">';
+        html += '<h3 style="font-size:1rem;font-weight:700;margin-bottom:12px;">Write a Review</h3>';
+        if (canReviewGym(g)) {
+            html += '<div style="display:flex;gap:4px;margin-bottom:12px;" id="starPicker">';
+            for (let i = 1; i <= 5; i++) {
+                html += '<button style="background:none;font-size:1.5rem;color:rgba(255,255,255,0.15);transition:color 0.2s;padding:4px;" onclick="pickStar(' + i + ')" data-star="' + i + '">★</button>';
+            }
+            html += '</div>';
+            html += '<textarea class="input-glass" id="reviewText" rows="3" placeholder="Share your experience..." style="resize:none;margin-bottom:12px;"></textarea>';
+            html += '<button class="btn-primary" style="padding:12px 24px;" onclick="submitReview()">Submit Review</button>';
+        } else {
+            html += '<div class="review-gate-note">';
+            html += '<div style="font-weight:700;margin-bottom:6px;">Review unlocked after you join this gym</div>';
+            html += '<div style="font-size:0.88rem;color:var(--text-secondary);line-height:1.6;">' + escapeHtml(getReviewEligibilityMessage(g)) + '</div>';
+            html += '</div>';
+        }
+        html += '</div>';
+
+        html += '</div>';
+
+        document.getElementById('gymProfileApp').innerHTML = html;
+        if (window.__gymPhotoTimer) {
+            clearInterval(window.__gymPhotoTimer);
+        }
+
+        window.__gymPhotoTimer = setInterval(() => {
+            currentPhoto = (currentPhoto + 1) % g.photos.length;
+            goToPhoto(currentPhoto);
+        }, 4000);
+
+        window.goToPhoto = function(index) {
+            currentPhoto = index;
+            const img = document.getElementById('carouselImg');
+            if (!img) return;
+            img.style.opacity = '0';
+            setTimeout(() => {
+                img.src = g.photos[index];
+                img.style.opacity = '1';
+            }, 250);
+
+            document.querySelectorAll('.photo-carousel .dot').forEach((dot, dotIndex) => {
+                dot.classList.toggle('active', dotIndex === index);
+            });
+        };
+    }
+
+    function selectPlan(index) {
+        window.__selectedGymPlanIndex = index;
+        const selectedPlan = (gym.plans || [])[index] || null;
+        if (selectedPlan && typeof trackGymActivity === 'function') {
+            trackGymActivity(gym, 'Viewed Pricing', {
+                planName: selectedPlan.name || '',
+                planPrice: Number(selectedPlan.price) || 0
+            }).catch(error => console.warn('Pricing activity sync failed', error));
+        }
+        renderGymProfile(gym);
+    }
+
+    function handlePrimaryPlanAction() {
+        const selectedPlan = getSelectedPlan();
+        const planState = getPrimaryPlanState(gym, selectedPlan);
+        if (!selectedPlan || planState.disabled) return;
+
+        const success = planState.action === 'trial'
+            ? claimTrial(gym.id)
+            : joinGymPlan(gym.id, selectedPlan.name);
+
+        if (success) {
+            renderGymProfile(gym);
+        }
+    }
+
+    function pickStar(value) {
+        selectedStars = value;
+        document.querySelectorAll('#starPicker button').forEach((button, index) => {
+            button.style.color = index < value ? '#F59E0B' : 'rgba(255,255,255,0.15)';
+        });
+    }
+
+    function submitReview() {
+        const textInput = document.getElementById('reviewText');
+        const text = textInput ? textInput.value.trim() : '';
+
+        if (!isLoggedIn()) {
+            window.location.href = 'login.html?redirect=gym-profile.html?id=' + gymId;
+            return;
+        }
+
+        if (!canReviewGym(gym)) {
+            showToast(getReviewEligibilityMessage(gym), 'warning');
+            return;
+        }
+
+        if (!selectedStars) {
+            showToast('Please select a rating.', 'warning');
+            return;
+        }
+
+        if (!text) {
+            showToast('Please write your review.', 'warning');
+            return;
+        }
+
+        const saved = saveReviewForGym(gym, selectedStars, text);
+        if (!saved) {
+            showToast('Could not save your review right now.', 'error');
+            return;
+        }
+
+        if (typeof syncReviewToCloud === 'function') {
+            syncReviewToCloud(gym, saved).catch(error => console.warn('Review sync failed', error));
+        }
+        if (typeof trackGymActivity === 'function') {
+            trackGymActivity(gym, 'Submitted Review', {
+                rating: selectedStars
+            }).catch(error => console.warn('Review activity sync failed', error));
+        }
+
+        selectedStars = 0;
+        renderGymProfile(gym);
+        showToast('Review submitted. Thank you for sharing your experience.', 'success');
+    }
+
+    function renderEntryRequestHint() {
+        const hint = document.getElementById('entryRequestHint');
+        const button = document.getElementById('entryRequestBtn');
+        const cancelButton = document.getElementById('entryCancelBtn');
+        if (!hint || !button) {
+            syncEntryRequestHintTicker(false);
+            return;
+        }
+
+        syncApprovedEntryRequests();
+        const openEntry = getOpenAttendanceEntryForGym(gym);
+        const request = getLatestEntryRequestForGym(gym.id, ['pending', 'approved', 'rejected', 'cancelled', 'expired']);
+
+        if (openEntry) {
+            hint.innerHTML = '<strong>Entry still active.</strong><br><span style="color:var(--text-secondary);font-size:0.82rem;">You checked in at ' + escapeHtml(openEntry.time || 'the gym desk') + '. Ask the admin to mark exit before requesting another code.</span>';
+            hint.style.display = 'block';
+            button.disabled = true;
+            button.textContent = 'Awaiting Exit';
+            button.style.opacity = '0.72';
+            if (cancelButton) cancelButton.style.display = 'none';
+            syncEntryRequestHintTicker(false);
+            return;
+        }
+
+        if (!request) {
+            hint.style.display = 'none';
+            button.disabled = false;
+            button.textContent = 'Request Entry';
+            button.style.opacity = '1';
+            if (cancelButton) cancelButton.style.display = 'none';
+            syncEntryRequestHintTicker(false);
+            return;
+        }
+
+        const requestTime = new Date(request.requestedAt || request.updatedAt || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const requestMeta = getEntryRequestMeta(request);
+        let message = '';
+
+        if (request.status === 'pending') {
+            const expiresAtTime = new Date(requestMeta.expiresAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            message = '<strong>Live code:</strong> ' + escapeHtml(request.otp) + '<br><span style="color:var(--text-secondary);font-size:0.82rem;">Requested at ' + escapeHtml(requestTime) + '. Expires in ' + escapeHtml(formatEntryRequestTimeLeft(request)) + ' at ' + escapeHtml(expiresAtTime) + '. Ask gym staff to approve this code in the dashboard.</span>';
+            button.disabled = true;
+            button.textContent = 'Pending Approval';
+            button.style.opacity = '0.75';
+            if (cancelButton) cancelButton.style.display = 'inline-flex';
+            syncEntryRequestHintTicker(true);
+        } else if (request.status === 'approved') {
+            message = '<strong>Last visit synced.</strong><br><span style="color:var(--text-secondary);font-size:0.82rem;">Your previous entry was approved and added to attendance. Request a new code when you are ready for the next visit.</span>';
+            button.disabled = false;
+            button.textContent = 'Request Again';
+            button.style.opacity = '1';
+            if (cancelButton) cancelButton.style.display = 'none';
+            syncEntryRequestHintTicker(false);
+        } else if (request.status === 'cancelled') {
+            message = '<strong>Entry code cancelled.</strong><br><span style="color:var(--text-secondary);font-size:0.82rem;">Your last code was cancelled. Request a fresh code when you are ready.</span>';
+            button.disabled = false;
+            button.textContent = 'Request Entry';
+            button.style.opacity = '1';
+            if (cancelButton) cancelButton.style.display = 'none';
+            syncEntryRequestHintTicker(false);
+        } else if (request.status === 'expired') {
+            message = '<strong>Entry code expired.</strong><br><span style="color:var(--text-secondary);font-size:0.82rem;">Codes stay valid for only 2 minutes. Request a fresh code to try again.</span>';
+            button.disabled = false;
+            button.textContent = 'Request New Code';
+            button.style.opacity = '1';
+            if (cancelButton) cancelButton.style.display = 'none';
+            syncEntryRequestHintTicker(false);
+        } else {
+            message = '<strong>Last request was rejected.</strong><br><span style="color:var(--text-secondary);font-size:0.82rem;">You can request a new code now.</span>';
+            button.disabled = false;
+            button.textContent = 'Request Entry';
+            button.style.opacity = '1';
+            if (cancelButton) cancelButton.style.display = 'none';
+            syncEntryRequestHintTicker(false);
+        }
+
+        hint.innerHTML = message;
+        hint.style.display = 'block';
+    }
+
+    function syncEntryRequestHintTicker(shouldRun) {
+        if (window.__entryRequestHintTicker) {
+            clearInterval(window.__entryRequestHintTicker);
+            window.__entryRequestHintTicker = null;
+        }
+
+        if (shouldRun) {
+            window.__entryRequestHintTicker = setInterval(() => {
+                renderEntryRequestHint();
+            }, 1000);
+        }
+    }
+
+    async function requestEntry() {
+        const request = await createEntryRequest(gym);
+        if (!request) return;
+
+        renderEntryRequestHint();
+        showToast('Your live entry code is ' + request.otp + '. It stays valid for 2 minutes.', 'success');
+    }
+
+    function cancelGymEntryRequest() {
+        const request = getLatestEntryRequestForGym(gym.id, ['pending']);
+        if (!request) {
+            renderEntryRequestHint();
+            showToast('There is no active entry code to cancel.', 'info');
+            return;
+        }
+
+        const cancelled = cancelEntryRequest(request.id);
+        if (!cancelled) return;
+
+        renderEntryRequestHint();
+        showToast('Entry code cancelled. Request a new one when needed.', 'info');
+    }
+
+    function toggleFavProfile() {
+        const isFav = toggleFavorite(gym.id);
+        const button = document.getElementById('favBtn');
+        if (button) {
+            button.textContent = isFav ? 'Saved' : 'Save';
+        }
+    }
+
+    function shareGym() {
+        if (navigator.share) {
+            navigator.share({
+                title: gym.name,
+                text: 'Check out ' + gym.name + ' on SuperFit.',
+                url: window.location.href
+            });
+            return;
+        }
+
+        navigator.clipboard.writeText(window.location.href);
+        showToast('Link copied to clipboard.', 'info');
+    }
+</script>
+
+</body>
+</html>
