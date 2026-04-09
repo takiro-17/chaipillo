@@ -252,74 +252,139 @@ const PARTNER_SOURCES = {
     tint: '#FDE68A',
     glow: '#FFF3C4',
     surface: 'rgba(245,158,11,0.14)',
-    ctaLabel: 'Open in Amazon',
-    checkoutLabel: 'Continue in Amazon',
-    checkoutNote: 'Final pricing, offers, and payment happen on Amazon.'
-  },
-  flipkart: {
-    id: 'flipkart',
-    label: 'Flipkart',
-    emblem: 'F',
-    accent: '#38BDF8',
-    tint: '#BAE6FD',
-    glow: '#E0F2FE',
-    surface: 'rgba(56,189,248,0.14)',
-    ctaLabel: 'Open in Flipkart',
-    checkoutLabel: 'Continue in Flipkart',
-    checkoutNote: 'Your FitConnect bag stays here, but checkout moves to Flipkart.'
-  },
-  meesho: {
-    id: 'meesho',
-    label: 'Meesho',
-    emblem: 'M',
-    accent: '#FB7185',
-    tint: '#FDA4AF',
-    glow: '#FFE4E6',
-    surface: 'rgba(251,113,133,0.14)',
-    ctaLabel: 'Open in Meesho',
-    checkoutLabel: 'Continue in Meesho',
-    checkoutNote: 'Value picks stay grouped here and open in Meesho when you are ready.'
-  },
-  zomato: {
-    id: 'zomato',
-    label: 'Zomato',
-    emblem: 'Z',
-    accent: '#EF4444',
-    tint: '#FCA5A5',
-    glow: '#FEE2E2',
-    surface: 'rgba(239,68,68,0.14)',
-    ctaLabel: 'Open in Zomato',
-    checkoutLabel: 'Continue in Zomato',
-    checkoutNote: 'Protein meal availability depends on your location in Zomato.'
+    ctaLabel: 'Open on Amazon',
+    checkoutLabel: 'Open saved links',
+    checkoutNote: 'Exact Amazon product page. Live price, stock, and checkout stay on Amazon.'
   }
 };
 
 const PRODUCTS = [
-  { id: 1, name: 'Whey Protein Isolate', brand: 'MuscleBlaze', price: 2499, originalPrice: 3499, rating: 4.6, reviews: 1240, category: 'protein', source: 'amazon', desc: 'Premium whey isolate with 26g protein per serving, shortlisted for fast post-workout recovery.', sizes: ['1kg', '2kg'], partnerQuery: 'MuscleBlaze whey protein isolate 1kg', deliveryText: 'Curated from Amazon. Final offers confirm on Amazon.', highlights: ['26g protein per scoop', 'Low sugar recovery pick', 'Trusted marketplace listing'], curatorNote: 'Picked for lean recovery stacks.' },
-  { id: 2, name: 'Gold Standard Whey', brand: 'Optimum Nutrition', price: 4299, originalPrice: 5199, rating: 4.8, reviews: 3420, category: 'protein', source: 'flipkart', desc: 'Popular whey blend with strong flavor coverage and dependable protein density.', sizes: ['2lb', '5lb'], partnerQuery: 'Optimum Nutrition Gold Standard Whey 2lb', deliveryText: 'Curated from Flipkart. Compare seller offers before payment.', highlights: ['24g whey protein', 'High review confidence', 'Strong flavor variety'], curatorNote: 'Great for users who want a proven everyday whey.' },
-  { id: 3, name: 'Plant Protein Blend', brand: 'Yoga Bar', price: 1899, originalPrice: 2299, rating: 4.4, reviews: 560, category: 'protein', source: 'amazon', desc: 'A vegan recovery option with pea and brown rice protein for lighter digestion.', sizes: ['1kg'], partnerQuery: 'Yoga Bar plant protein blend 1kg', deliveryText: 'Curated from Amazon. Good option for dairy-free users.', highlights: ['Plant-based protein', 'Digestive friendly blend', 'Single-serve simplicity'], curatorNote: 'Added for members avoiding dairy-heavy supplements.' },
-  { id: 4, name: 'Pre-Workout Surge', brand: 'Bigmuscles', price: 999, originalPrice: 1499, rating: 4.3, reviews: 890, category: 'supplements', source: 'flipkart', desc: 'A high-energy pre-workout option with caffeine support for early training sessions.', sizes: ['300g'], partnerQuery: 'Bigmuscles pre workout surge 300g', deliveryText: 'Curated from Flipkart. Ingredients and tolerance should be checked before use.', highlights: ['High-stim workout boost', 'Best for early sessions', 'Curated for advanced users'], curatorNote: 'Intended for users who already know their caffeine tolerance.' },
-  { id: 5, name: 'BCAA Energy Drink', brand: 'Fast&Up', price: 799, originalPrice: 999, rating: 4.5, reviews: 670, category: 'supplements', source: 'amazon', desc: 'Electrolyte and BCAA support for long cardio or hot-weather sessions.', sizes: ['20 tabs', '40 tabs'], partnerQuery: 'Fast&Up BCAA energy drink tablets', deliveryText: 'Curated from Amazon. Useful for training days with higher sweat loss.', highlights: ['Electrolyte support', 'Portable hydration format', 'Easy daily recovery stack'], curatorNote: 'Good fit for long sessions and outdoor training.' },
-  { id: 6, name: 'Creatine Monohydrate', brand: 'GNC', price: 1299, originalPrice: 1599, rating: 4.7, reviews: 2100, category: 'supplements', source: 'amazon', desc: 'Micronized creatine for strength and power-focused routines.', sizes: ['250g', '500g'], partnerQuery: 'GNC creatine monohydrate 250g', deliveryText: 'Curated from Amazon. Final stock depends on partner seller availability.', highlights: ['Pure creatine support', 'Strength and power focus', 'Repeat-purchase staple'], curatorNote: 'Included as a simple strength baseline supplement.' },
-  { id: 7, name: 'Compression T-Shirt', brand: 'HRX', price: 899, originalPrice: 1299, rating: 4.5, reviews: 340, category: 'clothing', source: 'flipkart', desc: 'A close-fit training tee that looks sharp in-gym and holds up through repeat washes.', sizes: ['S', 'M', 'L', 'XL'], partnerQuery: 'HRX compression t shirt men gym', deliveryText: 'Curated from Flipkart. Sizing should be checked in the partner listing.', highlights: ['Training fit silhouette', 'Quick dry fabric', 'Gym-to-street styling'], curatorNote: 'Selected to keep apparel aligned with the app vibe.' },
-  { id: 8, name: 'Training Shorts', brand: 'Performax', price: 699, originalPrice: 999, rating: 4.4, reviews: 280, category: 'clothing', source: 'meesho', desc: 'Lightweight active shorts with storage pockets and a clean minimal look.', sizes: ['S', 'M', 'L', 'XL'], partnerQuery: 'men training shorts gym quick dry', deliveryText: 'Curated from Meesho. Best for budget-friendly gym staples.', highlights: ['Budget activewear pick', 'Quick dry for cardio days', 'Pocket-friendly essential'], curatorNote: 'A lower-ticket essential that still fits the visual tone.' },
-  { id: 9, name: 'Stringer Tank', brand: 'Maniac Sport', price: 599, originalPrice: 799, rating: 4.3, reviews: 190, category: 'clothing', source: 'meesho', desc: 'Classic stringer cut for lifting days and warm weather workouts.', sizes: ['M', 'L', 'XL'], partnerQuery: 'stringer tank top gym men', deliveryText: 'Curated from Meesho. Review fit and fabric details before ordering.', highlights: ['Bodybuilding cut', 'Breathable gym layer', 'Value-focused apparel'], curatorNote: 'Added for serious lifting-day styling.' },
-  { id: 10, name: 'Gym Gloves Pro', brand: 'Kobo', price: 499, originalPrice: 799, rating: 4.2, reviews: 450, category: 'accessories', source: 'amazon', desc: 'Grip-focused gloves with wrist support for higher-volume sessions.', sizes: ['S/M', 'L/XL'], partnerQuery: 'Kobo gym gloves wrist support', deliveryText: 'Curated from Amazon. Useful for pulling volume and beginner comfort.', highlights: ['Grip support for pull days', 'Wrist support included', 'Low-ticket add-on'], curatorNote: 'A practical accessory for entry-level gym users.' },
-  { id: 11, name: 'Lifting Belt', brand: 'RDX', price: 1599, originalPrice: 2199, rating: 4.6, reviews: 820, category: 'accessories', source: 'flipkart', desc: 'Structured support belt for heavy compound lifts and more confident bracing.', sizes: ['M', 'L', 'XL'], partnerQuery: 'RDX lifting belt gym leather', deliveryText: 'Curated from Flipkart. Best for intermediate and advanced lifting routines.', highlights: ['Heavy lift support', 'Bracing confidence', 'Serious strength accessory'], curatorNote: 'Selected for users moving into heavier training blocks.' },
-  { id: 12, name: 'Shaker Bottle 700ml', brand: 'Boldfit', price: 399, originalPrice: 599, rating: 4.7, reviews: 5200, category: 'accessories', source: 'meesho', desc: 'A practical bottle for shakes, hydration, and fast carry inside the gym bag.', sizes: ['700ml'], partnerQuery: 'shaker bottle 700ml gym', deliveryText: 'Curated from Meesho. Easy add-on item for everyday use.', highlights: ['Easy daily carry', 'Simple gym essential', 'Fast utility purchase'], curatorNote: 'A low-friction everyday accessory.' },
-  { id: 13, name: 'Resistance Bands Set', brand: 'Boldfit', price: 599, originalPrice: 899, rating: 4.4, reviews: 1100, category: 'accessories', source: 'amazon', desc: 'Portable set for warmups, home workouts, and mobility sessions.', sizes: ['Set of 5'], partnerQuery: 'Boldfit resistance bands set of 5', deliveryText: 'Curated from Amazon. Useful both in-gym and at home.', highlights: ['Warmup and mobility support', 'Compact home workout kit', 'Travel-friendly format'], curatorNote: 'Included for flexibility and hotel-room training.' },
-  { id: 14, name: 'Mass Gainer 3kg', brand: 'MuscleBlaze', price: 2199, originalPrice: 2999, rating: 4.3, reviews: 780, category: 'protein', source: 'flipkart', desc: 'Calorie-dense support for hard gainers trying to push consistent surplus days.', sizes: ['3kg'], partnerQuery: 'MuscleBlaze mass gainer 3kg', deliveryText: 'Curated from Flipkart. Check flavor and calorie profile before purchase.', highlights: ['High-calorie bulking support', 'Budget-conscious weight gain', 'Good for hard gainer phases'], curatorNote: 'Added specifically for bulk-cycle users.' },
-  { id: 15, name: 'Protein Wrap Combo', brand: 'Healthy Bowl', price: 349, originalPrice: 399, rating: 4.5, reviews: 220, category: 'food', source: 'zomato', desc: 'A protein-forward meal idea saved into your bag so you can jump into the delivery app when ready.', sizes: ['Meal combo'], partnerUrl: 'https://www.zomato.com/', deliveryText: 'Curated from Zomato. Meal availability depends on your area and the live menu.', highlights: ['High-protein meal idea', 'Location-based availability', 'Fast post-workout food'], curatorNote: 'Used as a prototype for food-partner handoff flows.' },
-  { id: 16, name: 'Grilled Chicken Rice Bowl', brand: 'EatFit', price: 289, originalPrice: 339, rating: 4.4, reviews: 310, category: 'food', source: 'zomato', desc: 'Lean protein and carbs in a simple post-workout format, surfaced as a curated food pick.', sizes: ['Single bowl'], partnerUrl: 'https://www.zomato.com/', deliveryText: 'Curated from Zomato. Search opens in the partner app or site based on your location.', highlights: ['Lean protein meal', 'Fast refuel format', 'Live location-based catalog'], curatorNote: 'Best used as a nearby delivery suggestion, not fixed inventory.' }
+  {
+    id: 1,
+    name: '100% Clean Raw Whey Isolate',
+    brand: 'MuscleBlaze',
+    price: 3739,
+    originalPrice: 4150,
+    rating: 4.1,
+    reviews: 7689,
+    category: 'protein',
+    source: 'amazon',
+    desc: 'Unflavoured whey isolate with digestive enzymes for lean recovery-focused stacks.',
+    sizes: ['1 kg'],
+    partnerUrl: 'https://www.amazon.in/MuscleBlaze-Raw-Whey-Isolate-1kg/dp/B01N1MZYEG',
+    imageUrl: 'images/store/muscleblaze-raw-whey.jpg',
+    deliveryText: 'Verified Amazon listing. Live pricing and stock stay on Amazon.',
+    highlights: ['27g protein per scoop', 'Digestive enzymes', '1 kg pack']
+  },
+  {
+    id: 2,
+    name: 'Gold Standard 100% Whey',
+    brand: 'Optimum Nutrition',
+    price: 3463,
+    originalPrice: 3799,
+    rating: 4.2,
+    reviews: 59903,
+    category: 'protein',
+    source: 'amazon',
+    desc: 'The widely used everyday whey option with a Double Rich Chocolate variant and 24g protein blend.',
+    sizes: ['907 g'],
+    partnerUrl: 'https://www.amazon.in/Optimum-Nutrition-Standard-Protein-Powder/dp/B002DYIZH6',
+    imageUrl: 'images/store/on-gold-standard.jpg',
+    deliveryText: 'Exact Amazon product page for the 907 g Double Rich Chocolate listing.',
+    highlights: ['24g protein blend', '907 g tub', 'Double Rich Chocolate']
+  },
+  {
+    id: 3,
+    name: 'Whey Max',
+    brand: 'FUELONE',
+    price: 2299,
+    originalPrice: 2599,
+    rating: 4.2,
+    reviews: 1346,
+    category: 'protein',
+    source: 'amazon',
+    desc: '1 kg chocolate whey with concentrate and isolate aimed at budget-conscious mass and recovery plans.',
+    sizes: ['1 kg'],
+    partnerUrl: 'https://www.amazon.in/Protein-Concentrate-Isolate-Glutamic-Chocolate/dp/B0CDBVQQLZ',
+    imageUrl: 'images/store/fuelone-whey.jpg',
+    deliveryText: 'Exact Amazon listing for the 1 kg chocolate pack.',
+    highlights: ['27g protein', 'Chocolate flavour', '1 kg pack']
+  },
+  {
+    id: 4,
+    name: 'Micronized Creatine Powder',
+    brand: 'Optimum Nutrition',
+    price: 778,
+    originalPrice: 899,
+    rating: 4.3,
+    reviews: 13069,
+    category: 'performance',
+    source: 'amazon',
+    desc: 'Straight creatine monohydrate for strength, power, and simple stacking with shakes or water.',
+    sizes: ['250 g'],
+    partnerUrl: 'https://www.amazon.in/Optimum-Nutrition-Micro-Creatine-Powder/dp/B002DYIZEE',
+    imageUrl: 'images/store/on-creatine.jpg',
+    deliveryText: 'Exact Amazon listing for the 250 g ON creatine tub.',
+    highlights: ['83 servings', '3g creatine per serve', 'Unflavoured']
+  },
+  {
+    id: 5,
+    name: 'Pre Workout 200',
+    brand: 'MuscleBlaze',
+    price: 699,
+    originalPrice: 799,
+    rating: 3.9,
+    reviews: 4944,
+    category: 'performance',
+    source: 'amazon',
+    desc: 'Compact pre-workout tub for energy, focus, and a lighter low-volume boost before training.',
+    sizes: ['100 g'],
+    partnerUrl: 'https://www.amazon.in/MuscleBlaze-Workout-Caffeine-Citrulline-servings/dp/B08KPJRRL2',
+    imageUrl: 'images/store/mb-pre-workout.jpg',
+    deliveryText: 'Exact Amazon listing for the 100 g Fruit Splash tub.',
+    highlights: ['200mg caffeine', '2200mg citrulline', '16 servings']
+  },
+  {
+    id: 6,
+    name: 'Heavy Resistance Band',
+    brand: 'Boldfit',
+    price: 1149,
+    originalPrice: 1399,
+    rating: 4.1,
+    reviews: 15177,
+    category: 'gear',
+    source: 'amazon',
+    desc: 'Portable heavy loop band for pull-ups, stretching, warmups, and home training days.',
+    sizes: ['40-60 kg'],
+    partnerUrl: 'https://www.amazon.in/Boldfit-Natural-Resistance-Exercise-Stretching/dp/B0DM25Q1SD',
+    imageUrl: 'images/store/boldfit-band.jpg',
+    deliveryText: 'Exact Amazon listing for the green 40-60 kg resistance band.',
+    highlights: ['Pull-up assistance', 'Stretching and warmups', 'Home workout gear']
+  },
+  {
+    id: 7,
+    name: 'Hydra Trek Water Bottle',
+    brand: 'Borosil',
+    price: 820,
+    originalPrice: 959,
+    rating: 4.2,
+    reviews: 18040,
+    category: 'gear',
+    source: 'amazon',
+    desc: 'Vacuum insulated steel bottle for gym, commute, and all-day hydration without bright plastic clutter.',
+    sizes: ['700 ml'],
+    partnerUrl: 'https://www.amazon.in/Borosil-Stainless-Steel-Bottle-Green/dp/B07DFQ7M98',
+    imageUrl: 'images/store/borosil-hydra.jpg',
+    deliveryText: 'Exact Amazon listing for the 700 ml Hydra Trek bottle.',
+    highlights: ['20h hot / 24h cold', '700 ml', 'Vacuum insulated']
+  }
 ];
 
 const CATEGORIES = [
   { id: 'all', label: 'All', active: true },
   { id: 'protein', label: 'Protein', active: false },
-  { id: 'supplements', label: 'Supplements', active: false },
-  { id: 'clothing', label: 'Clothing', active: false },
-  { id: 'accessories', label: 'Accessories', active: false },
-  { id: 'food', label: 'Protein Food', active: false }
+  { id: 'performance', label: 'Performance', active: false },
+  { id: 'gear', label: 'Gear', active: false }
 ];
 
 function getSourceMeta(sourceId) {
@@ -482,7 +547,7 @@ function addToCart(productId, size) {
     cart.push({ id: product.id, size: normalizedSize, qty: 1 });
   }
   saveCart(cart);
-  showToast('Added to your bag.', 'success');
+  showToast('Added to cart.', 'success');
 }
 
 function removeFromCart(productId, size) {
@@ -982,21 +1047,12 @@ function getProductHighlights(product) {
 function getProductDeliveryText(product) {
   return product && product.deliveryText
     ? product.deliveryText
-    : ('Curated from ' + getSourceMeta(product && product.source).label + '. Final checkout happens in the partner app.');
+    : ('Exact ' + getSourceMeta(product && product.source).label + ' listing. Live pricing and checkout stay on the product page.');
 }
 
 function getProductPartnerUrl(product) {
   if (!product) return '';
-  if (product.partnerUrl) return product.partnerUrl;
-
-  const query = encodeURIComponent(String(product.partnerQuery || product.name || '').trim());
-  if (!query) return '';
-
-  if (product.source === 'amazon') return 'https://www.amazon.in/s?k=' + query;
-  if (product.source === 'flipkart') return 'https://www.flipkart.com/search?q=' + query;
-  if (product.source === 'meesho') return 'https://www.meesho.com/search?q=' + query;
-  if (product.source === 'zomato') return 'https://www.zomato.com/';
-  return '';
+  return product.partnerUrl || '';
 }
 
 function openPartnerProduct(product, options = {}) {
@@ -1020,6 +1076,7 @@ function openPartnerProduct(product, options = {}) {
 }
 
 function getProductArt(product) {
+  if (product && product.imageUrl) return product.imageUrl;
   if (product.imageDataUri) return product.imageDataUri;
 
   const theme = getProductTheme(product);
@@ -2477,9 +2534,24 @@ function showToast(message, type = 'info') {
     document.body.appendChild(container);
   }
 
+  const key = type + '::' + String(message || '');
+  const existing = container.querySelector('.toast');
+  if (existing && existing.dataset.key === key) {
+    if (container._toastHideTimer) clearTimeout(container._toastHideTimer);
+    container._toastHideTimer = setTimeout(() => {
+      existing.style.animation = 'toastOut 0.3s ease forwards';
+      setTimeout(() => existing.remove(), 300);
+    }, 2200);
+    return;
+  }
+
+  if (container._toastHideTimer) clearTimeout(container._toastHideTimer);
+  container.replaceChildren();
+
   const icons = { success: 'OK', error: 'X', info: 'i', warning: '!' };
   const toast = document.createElement('div');
   toast.className = 'toast ' + type;
+  toast.dataset.key = key;
 
   const icon = document.createElement('span');
   icon.textContent = icons[type] || 'i';
@@ -2490,10 +2562,10 @@ function showToast(message, type = 'info') {
   toast.appendChild(text);
   container.appendChild(toast);
 
-  setTimeout(() => {
+  container._toastHideTimer = setTimeout(() => {
     toast.style.animation = 'toastOut 0.3s ease forwards';
     setTimeout(() => toast.remove(), 300);
-  }, 3000);
+  }, 2200);
 }
 
 function syncApprovedEntryRequests() {

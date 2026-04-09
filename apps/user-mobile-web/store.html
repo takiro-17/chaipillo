@@ -4,119 +4,88 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Store - SuperFit</title>
-    <meta name="description" content="Browse curated partner products, save them to your FitConnect bag, and finish checkout in the original marketplace app.">
+    <meta name="description" content="Browse real fitness products with exact Amazon product pages, real images, and a cleaner mobile-first store experience.">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<div class="app-container">
-    <div class="page-header">
-        <h1>Store</h1>
-        <button class="btn-icon btn-icon-text" onclick="openCart()" id="headerCartBtn" style="position:relative;">
-            Bag
-            <span id="headerCartCount" style="position:absolute;top:-4px;right:-4px;width:18px;height:18px;background:var(--primary);color:white;font-size:0.65rem;font-weight:800;border-radius:50%;display:none;align-items:center;justify-content:center;">0</span>
-        </button>
-    </div>
-
-    <div class="content-padding" style="margin-bottom:12px;">
-        <div class="search-container">
-            <span class="search-icon" aria-hidden="true">
+<div class="store-shell">
+    <header class="store-topbar">
+        <div>
+            <p class="store-kicker">Verified product picks</p>
+            <h1>Store</h1>
+        </div>
+        <button class="store-cart-button" type="button" onclick="openStoreCart()" aria-label="Open cart">
+            <span class="store-cart-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" focusable="false">
-                    <path d="M10.5 4a6.5 6.5 0 1 0 4.11 11.54l4.42 4.42 1.41-1.41-4.42-4.42A6.5 6.5 0 0 0 10.5 4Zm0 2a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Z" fill="currentColor"></path>
+                    <path d="M7 6h13l-1.6 7.2a2 2 0 0 1-1.95 1.56H9.17A2 2 0 0 1 7.22 13L5.75 4.8A1 1 0 0 0 4.77 4H3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                    <circle cx="10" cy="19" r="1.4" fill="currentColor"></circle>
+                    <circle cx="17" cy="19" r="1.4" fill="currentColor"></circle>
                 </svg>
             </span>
-            <input type="text" class="input-glass" id="storeSearch" placeholder="Search curated products, brands, or partner apps..." oninput="filterProducts(this.value)">
-        </div>
-    </div>
+            <span>Cart</span>
+            <span class="store-cart-count" id="headerCartCount">0</span>
+        </button>
+    </header>
 
-    <div class="content-padding" style="padding-top:0;">
-        <div class="glass-card-static store-hero-card store-partner-hero animate-in">
-            <div class="store-hero-copy">
-                <div class="store-hero-eyebrow">Curated Partner Store</div>
-                <div class="store-hero-title">Selected products from the apps your members already know</div>
-                <div class="store-hero-desc">Save products into a FitConnect bag, see exactly where every item comes from, and jump into the original app only when you are ready to buy.</div>
-                <div class="store-hero-inline" id="heroMetrics"></div>
-            </div>
-            <div class="store-hero-visual">
-                <div class="store-hero-orb store-hero-orb-one"></div>
-                <div class="store-hero-orb store-hero-orb-two"></div>
-                <div class="store-hero-orb store-hero-orb-three"></div>
-                <div class="source-spotlight" id="sourceSpotlight"></div>
-            </div>
-        </div>
-    </div>
+    <section class="store-search-row">
+        <label class="store-search" for="storeSearch">
+            <span class="store-search-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                    <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"></circle>
+                    <path d="m16 16 4.2 4.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+                </svg>
+            </span>
+            <input id="storeSearch" type="text" autocomplete="off" placeholder="Search products" oninput="filterProducts(this.value)">
+        </label>
+    </section>
 
-    <div class="content-padding" style="padding-top:0;">
-        <div class="partner-helper-banner">
-            <div class="partner-helper-copy">
-                <div class="partner-helper-kicker">How Checkout Works</div>
-                <div class="partner-helper-title">Your bag is the shortlist. Final payment, delivery, and offers always happen in the original app.</div>
-            </div>
-            <button class="btn-glass partner-helper-btn" onclick="openCheckout()">Review Handoff</button>
+    <section class="store-hero-card">
+        <div class="store-hero-copy">
+            <p class="store-kicker">Real catalog</p>
+            <h2>Real products. Real images. Exact Amazon product pages.</h2>
+            <p class="store-hero-text">Every card opens the exact listing shown here. The price and stock stay live on Amazon. The UI stays dark, faster, and quieter.</p>
         </div>
-    </div>
+        <div class="store-hero-stats" id="heroStats"></div>
+    </section>
 
-    <div class="content-padding" id="handoffsSection" style="display:none;padding-top:0;">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;">
-            <h2 class="section-title" style="margin-bottom:0;">Recent Handoffs</h2>
-            <button class="btn-glass" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })" style="padding:8px 14px;">Back to Top</button>
+    <section class="store-featured-block">
+        <div class="store-section-head">
+            <h3>Featured</h3>
+            <p>Fast access to the strongest picks in this build.</p>
         </div>
-        <div id="handoffsList"></div>
-    </div>
+        <div class="store-featured-strip" id="featuredStrip"></div>
+    </section>
 
-    <div class="source-pills" id="sourcePills"></div>
-    <div class="category-pills" id="categoryPills"></div>
-    <div class="store-grid" id="productsGrid"></div>
-    <div style="height:24px;"></div>
+    <section class="store-filter-block">
+        <div class="store-filter-row" id="categoryPills"></div>
+        <div class="store-results-row">
+            <span id="resultsSummary">0 products</span>
+            <span>Exact Amazon links</span>
+        </div>
+    </section>
+
+    <section class="market-grid" id="productsGrid"></section>
+    <div class="store-page-spacer"></div>
 </div>
 
-<button class="cart-fab hidden" id="cartFab" onclick="openCart()">
-    Bag <span class="cart-count">0</span>
-</button>
-
 <div class="modal-overlay" id="cartModal">
-    <div class="modal-sheet">
+    <div class="modal-sheet store-modal-sheet">
         <div class="modal-handle"></div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-            <h2 style="font-size:1.3rem;font-weight:800;">Your Bag</h2>
-            <button class="btn-icon btn-icon-text" onclick="closeCart()" style="height:36px;font-size:0.78rem;">Close</button>
-        </div>
-        <div class="partner-note-banner" style="margin-bottom:16px;">
-            Saved in FitConnect, checked out in the original partner app.
-        </div>
-        <div id="cartItems"></div>
-        <div id="cartFooter" style="display:none;">
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-top:1px solid var(--border-glass);margin-top:12px;gap:14px;">
-                <div class="cart-footer-copy">
-                    <div style="font-size:0.8rem;color:var(--text-secondary);">Estimated Total</div>
-                    <div style="font-size:1.4rem;font-weight:900;" id="cartTotalPrice">&#8377;0</div>
-                    <div style="font-size:0.75rem;color:var(--text-tertiary);margin-top:4px;" id="cartFooterNote">Final price, offers, and delivery are confirmed in the partner app.</div>
-                </div>
-                <button class="btn-primary" onclick="openCheckout()" style="padding:14px 24px;">Review Handoff</button>
+        <div class="store-modal-head">
+            <div>
+                <p class="store-kicker">Saved picks</p>
+                <h2>Your Cart</h2>
             </div>
+            <button class="btn-icon btn-icon-text" type="button" onclick="closeStoreCart()">Close</button>
         </div>
+        <p class="store-modal-note">These items stay saved here, but each button opens the exact Amazon product page for that item.</p>
+        <div id="cartItems"></div>
     </div>
 </div>
 
 <div class="modal-overlay" id="productModal">
-    <div class="modal-sheet" id="productModalContent"></div>
-</div>
-
-<div class="modal-overlay" id="checkoutModal">
-    <div class="modal-sheet">
-        <div class="modal-handle"></div>
-        <div class="checkout-sheet-header">
-            <div>
-                <h2 style="font-size:1.3rem;font-weight:800;margin-bottom:4px;">Partner Checkout</h2>
-                <div style="font-size:0.86rem;color:var(--text-secondary);">Open the original listing from the partner app for each item you want to buy.</div>
-            </div>
-            <button class="btn-icon btn-icon-text" onclick="closeCheckout()" style="height:36px;font-size:0.78rem;">Close</button>
-        </div>
-        <div class="partner-note-banner" style="margin-bottom:16px;">
-            Partner carts are not synced yet, so FitConnect keeps the shortlist while each marketplace handles payment and delivery.
-        </div>
-        <div id="checkoutGroups"></div>
-    </div>
+    <div class="modal-sheet store-modal-sheet" id="productModalContent"></div>
 </div>
 
 <div id="toastContainer" class="toast-container"></div>
@@ -129,10 +98,11 @@
     initApp('store');
 
     let activeCategory = 'all';
-    let activeSource = 'all';
     let searchQuery = '';
     let productRenderFrame = 0;
     let hasRenderedProducts = false;
+
+    const FEATURED_PRODUCT_IDS = [1, 4, 6];
 
     function escapeHtml(value) {
         return String(value || '')
@@ -147,200 +117,135 @@
         return '\u20B9' + Number(value || 0).toLocaleString('en-IN');
     }
 
-    function formatDate(isoString) {
-        const date = new Date(isoString);
-        if (Number.isNaN(date.getTime())) return 'Recently';
-        return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    function getCategoryLabel(categoryId) {
+        const category = CATEGORIES.find(item => item.id === categoryId);
+        return category ? category.label : categoryId;
     }
 
-    function getSourceToneStyle(sourceId) {
-        const source = getSourceMeta(sourceId);
-        return '--source-accent:' + source.accent + ';--source-soft:' + source.surface + ';--source-glow:' + source.glow + ';';
-    }
-
-    function renderSourceBadge(sourceId, compact) {
-        const source = getSourceMeta(sourceId);
-        const compactClass = compact ? ' source-pill-compact' : '';
-        return '<span class="source-pill' + compactClass + '" style="' + getSourceToneStyle(sourceId) + '">' +
-            '<span class="source-pill-mark">' + escapeHtml(source.emblem) + '</span>' +
+    function renderSourceTag() {
+        const source = getSourceMeta('amazon');
+        return '<span class="market-source-pill">' +
+            '<span class="market-source-mark">' + escapeHtml(source.emblem) + '</span>' +
             '<span>' + escapeHtml(source.label) + '</span>' +
         '</span>';
     }
 
-    function renderHero() {
-        const sourceEntries = Object.keys(PARTNER_SOURCES);
-        const metrics = [
-            { value: PRODUCTS.length, label: 'curated picks' },
-            { value: sourceEntries.length, label: 'partner apps' },
-            { value: PRODUCTS.filter(product => product.category === 'food').length, label: 'protein food ideas' }
+    function getFilteredProducts() {
+        return PRODUCTS.filter(product => {
+            if (activeCategory !== 'all' && product.category !== activeCategory) return false;
+
+            if (!searchQuery) return true;
+
+            const query = searchQuery.toLowerCase();
+            return [
+                product.name,
+                product.brand,
+                product.category,
+                product.desc,
+                (product.highlights || []).join(' ')
+            ].join(' ').toLowerCase().includes(query);
+        });
+    }
+
+    function renderHeroStats() {
+        const stats = [
+            { label: 'Products', value: PRODUCTS.length },
+            { label: 'Exact links', value: PRODUCTS.length },
+            { label: 'Gear picks', value: PRODUCTS.filter(product => product.category === 'gear').length }
         ];
 
-        document.getElementById('heroMetrics').innerHTML = metrics.map(metric =>
-            '<div class="hero-metric"><strong>' + escapeHtml(metric.value) + '</strong><span>' + escapeHtml(metric.label) + '</span></div>'
+        document.getElementById('heroStats').innerHTML = stats.map(stat =>
+            '<div class="store-stat">' +
+                '<strong>' + escapeHtml(stat.value) + '</strong>' +
+                '<span>' + escapeHtml(stat.label) + '</span>' +
+            '</div>'
         ).join('');
+    }
 
-        document.getElementById('sourceSpotlight').innerHTML = sourceEntries.map((sourceId, index) => {
-            const source = getSourceMeta(sourceId);
-            const count = PRODUCTS.filter(product => product.source === sourceId).length;
-            return '<div class="source-spotlight-card" style="' + getSourceToneStyle(sourceId) + ';animation-delay:' + (index * 0.08) + 's">' +
-                '<div class="source-spotlight-mark">' + escapeHtml(source.emblem) + '</div>' +
-                '<div class="source-spotlight-copy">' +
-                    '<div class="source-spotlight-title">' + escapeHtml(source.label) + '</div>' +
-                    '<div class="source-spotlight-meta">' + escapeHtml(count) + ' curated items</div>' +
-                '</div>' +
-            '</div>';
-        }).join('');
+    function renderFeaturedStrip() {
+        const container = document.getElementById('featuredStrip');
+        const cards = FEATURED_PRODUCT_IDS
+            .map(getProductById)
+            .filter(Boolean)
+            .map(product => {
+                const discount = getDiscount(product.originalPrice, product.price);
+                return '<button class="featured-product-card" type="button" onclick="openProductDetail(' + product.id + ')">' +
+                    '<img src="' + escapeHtml(getProductArt(product)) + '" alt="' + escapeHtml(product.name) + '" loading="lazy">' +
+                    '<div class="featured-product-body">' +
+                        '<div class="featured-product-top">' +
+                            renderSourceTag() +
+                            (discount > 0 ? '<span class="featured-discount">-' + discount + '%</span>' : '') +
+                        '</div>' +
+                        '<div class="featured-product-brand">' + escapeHtml(product.brand) + '</div>' +
+                        '<div class="featured-product-name">' + escapeHtml(product.name) + '</div>' +
+                        '<div class="featured-product-price">' + escapeHtml(formatMoney(product.price)) + '</div>' +
+                    '</div>' +
+                '</button>';
+            });
+
+        container.innerHTML = cards.join('');
     }
 
     function renderCategories() {
         const container = document.getElementById('categoryPills');
         container.innerHTML = CATEGORIES.map(category =>
-            '<button class="btn-glass' + (category.id === activeCategory ? ' active' : '') + '" onclick="setCategory(' + JSON.stringify(category.id) + ', this)">' + escapeHtml(category.label) + '</button>'
+            '<button class="store-chip' + (category.id === activeCategory ? ' active' : '') + '" type="button" onclick="setCategory(' + JSON.stringify(category.id) + ')">' + escapeHtml(category.label) + '</button>'
         ).join('');
     }
 
-    function renderSourcePills() {
-        const container = document.getElementById('sourcePills');
-        const sourceItems = [{ id: 'all' }].concat(
-            Object.keys(PARTNER_SOURCES).map(sourceId => Object.assign({ count: PRODUCTS.filter(product => product.source === sourceId).length }, getSourceMeta(sourceId)))
-        );
-
-        container.innerHTML = sourceItems.map(source => {
-            const isActive = source.id === activeSource;
-            const count = source.id === 'all' ? PRODUCTS.length : source.count;
-            const badge = source.id === 'all'
-                ? '<span class="source-pill source-pill-compact"><span class="source-pill-mark">All</span><span>All</span></span>'
-                : renderSourceBadge(source.id, true);
-
-            return '<button class="source-filter-btn' + (isActive ? ' active' : '') + '" onclick="setSource(' + JSON.stringify(source.id) + ', this)">' +
-                badge +
-                '<span class="source-filter-count">' + escapeHtml(count) + '</span>' +
-            '</button>';
-        }).join('');
-    }
-
-    function setCategory(categoryId, button) {
+    function setCategory(categoryId) {
         activeCategory = categoryId;
-        document.querySelectorAll('#categoryPills .btn-glass').forEach(item => item.classList.remove('active'));
-        if (button) button.classList.add('active');
+        renderCategories();
         scheduleRenderProducts();
-    }
-
-    function setSource(sourceId, button) {
-        activeSource = sourceId;
-        document.querySelectorAll('#sourcePills .source-filter-btn').forEach(item => item.classList.remove('active'));
-        if (button) button.classList.add('active');
-        scheduleRenderProducts();
-    }
-
-    function getFilteredProducts() {
-        let filtered = PRODUCTS.slice();
-
-        if (activeCategory !== 'all') {
-            filtered = filtered.filter(product => product.category === activeCategory);
-        }
-
-        if (activeSource !== 'all') {
-            filtered = filtered.filter(product => product.source === activeSource);
-        }
-
-        if (searchQuery) {
-            const query = searchQuery.toLowerCase();
-            filtered = filtered.filter(product =>
-                product.name.toLowerCase().includes(query) ||
-                product.brand.toLowerCase().includes(query) ||
-                product.category.toLowerCase().includes(query) ||
-                getSourceMeta(product.source).label.toLowerCase().includes(query) ||
-                (product.partnerQuery || '').toLowerCase().includes(query) ||
-                (product.highlights || []).some(item => String(item).toLowerCase().includes(query))
-            );
-        }
-
-        return filtered;
-    }
-
-    function renderHandoffs() {
-        const section = document.getElementById('handoffsSection');
-        const list = document.getElementById('handoffsList');
-        const handoffs = getPartnerHandoffs();
-
-        if (!handoffs.length) {
-            section.style.display = 'none';
-            list.innerHTML = '';
-            return;
-        }
-
-        section.style.display = 'block';
-        list.innerHTML = handoffs.slice(0, 3).map(handoff => {
-            const firstItem = handoff.items && handoff.items[0] ? handoff.items[0] : null;
-            const title = handoff.itemCount > 1 && firstItem
-                ? firstItem.name + ' +' + (handoff.itemCount - 1) + ' more'
-                : (firstItem ? firstItem.name : 'Partner item');
-
-            return '<div class="glass-card-static store-handoff-card">' +
-                '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">' +
-                    '<div>' +
-                        renderSourceBadge(handoff.source, false) +
-                        '<div style="font-size:1rem;font-weight:800;margin:10px 0 4px;">' + escapeHtml(title) + '</div>' +
-                        '<div style="font-size:0.84rem;color:var(--text-secondary);">Opened on ' + escapeHtml(formatDate(handoff.createdAt)) + '</div>' +
-                    '</div>' +
-                    '<div style="text-align:right;">' +
-                        '<div class="badge badge-secondary" style="margin-bottom:8px;">Handoff</div>' +
-                        '<div style="font-size:1rem;font-weight:800;color:var(--secondary);">' + escapeHtml(formatMoney(handoff.total)) + '</div>' +
-                    '</div>' +
-                '</div>' +
-                '<div class="store-order-meta">' +
-                    '<span>' + escapeHtml(handoff.itemCount) + ' item(s)</span>' +
-                    '<span>' + escapeHtml(getSourceMeta(handoff.source).checkoutNote) + '</span>' +
-                '</div>' +
-            '</div>';
-        }).join('');
     }
 
     function renderProducts() {
         const grid = document.getElementById('productsGrid');
         const filtered = getFilteredProducts();
 
+        document.getElementById('resultsSummary').textContent = filtered.length + (filtered.length === 1 ? ' product' : ' products');
+
         if (!filtered.length) {
-            grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">Bag</div><div class="empty-title">No curated products found</div><div class="empty-desc">Try another source, category, or search term.</div></div>';
+            grid.innerHTML = '<div class="store-empty-state">' +
+                '<strong>No products match this search.</strong>' +
+                '<p>Try a different keyword or switch the category.</p>' +
+            '</div>';
             return;
         }
 
         grid.innerHTML = filtered.map((product, index) => {
             const discount = getDiscount(product.originalPrice, product.price);
-            const highlights = getProductHighlights(product);
             const animateClass = hasRenderedProducts ? '' : ' animate-in';
-            const animateStyle = hasRenderedProducts ? '' : ' style="animation-delay:' + (index * 0.04) + 's"';
+            const animateStyle = hasRenderedProducts ? '' : ' style="animation-delay:' + (index * 0.035) + 's"';
 
-            return '<div class="product-card partner-product-card' + animateClass + '"' + animateStyle + ' onclick="openProductDetail(' + product.id + ')">' +
-                '<div class="product-image product-image-art partner-product-art">' +
-                    '<img src="' + getProductArt(product) + '" alt="' + escapeHtml(product.name) + '" loading="lazy">' +
-                    '<div class="product-source-top">' + renderSourceBadge(product.source, true) + '</div>' +
-                    (discount > 0 ? '<span class="discount-tag">-' + discount + '%</span>' : '') +
+            return '<article class="market-card' + animateClass + '"' + animateStyle + '>' +
+                '<button class="market-card-press" type="button" onclick="openProductDetail(' + product.id + ')">' +
+                    '<div class="market-card-image-wrap">' +
+                        '<img class="market-card-image" src="' + escapeHtml(getProductArt(product)) + '" alt="' + escapeHtml(product.name) + '" loading="lazy">' +
+                        (discount > 0 ? '<span class="market-card-discount">-' + discount + '%</span>' : '') +
+                    '</div>' +
+                    '<div class="market-card-body">' +
+                        '<div class="market-card-topline">' +
+                            '<span class="market-card-brand">' + escapeHtml(product.brand) + '</span>' +
+                            renderSourceTag() +
+                        '</div>' +
+                        '<h3 class="market-card-title">' + escapeHtml(product.name) + '</h3>' +
+                        '<p class="market-card-desc">' + escapeHtml(product.desc) + '</p>' +
+                        '<div class="market-card-meta">' +
+                            '<span class="market-card-price">' + escapeHtml(formatMoney(product.price)) + '</span>' +
+                            '<span class="market-card-original">' + escapeHtml(formatMoney(product.originalPrice)) + '</span>' +
+                        '</div>' +
+                        '<div class="market-card-rating">' +
+                            '<span>\u2605 ' + escapeHtml(product.rating.toFixed(1)) + '</span>' +
+                            '<span>' + escapeHtml(Number(product.reviews).toLocaleString('en-IN')) + ' reviews</span>' +
+                        '</div>' +
+                    '</div>' +
+                '</button>' +
+                '<div class="market-card-actions">' +
+                    '<button class="market-secondary-btn" type="button" onclick="quickAdd(' + product.id + ')">Add to cart</button>' +
+                    '<button class="market-primary-btn" type="button" onclick="openPartnerProductFromStore(' + product.id + ')">Open</button>' +
                 '</div>' +
-                '<div class="product-body">' +
-                    '<div class="product-brand-row">' +
-                        '<div class="product-brand">' + escapeHtml(product.brand) + '</div>' +
-                        '<div class="product-curated-tag">Curated</div>' +
-                    '</div>' +
-                    '<div class="product-name">' + escapeHtml(product.name) + '</div>' +
-                    '<div class="product-helper-line">' + escapeHtml(getProductDeliveryText(product)) + '</div>' +
-                    '<div class="product-price-row">' +
-                        '<span class="product-price">' + escapeHtml(formatMoney(product.price)) + '</span>' +
-                        '<span class="product-original-price">' + escapeHtml(formatMoney(product.originalPrice)) + '</span>' +
-                    '</div>' +
-                    '<div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">' +
-                        '<span style="color:var(--warning);font-size:0.8rem;">&#9733; ' + escapeHtml(product.rating) + '</span>' +
-                        '<span style="color:var(--text-tertiary);font-size:0.75rem;">(' + escapeHtml(product.reviews) + ')</span>' +
-                    '</div>' +
-                    '<div class="product-highlight-row">' + highlights.map(item => '<span class="product-highlight-pill">' + escapeHtml(item) + '</span>').join('') + '</div>' +
-                    '<div class="product-curation-note">' + escapeHtml(product.curatorNote || '') + '</div>' +
-                    '<div class="product-action-row">' +
-                        '<button class="add-cart-btn" onclick="event.stopPropagation(); quickAdd(' + product.id + ')">Add to Bag</button>' +
-                        '<button class="ghost-link-btn" onclick="event.stopPropagation(); openPartnerProductFromStore(' + product.id + ')">' + escapeHtml(getSourceMeta(product.source).ctaLabel) + '</button>' +
-                    '</div>' +
-                '</div>' +
-            '</div>';
+            '</article>';
         }).join('');
 
         hasRenderedProducts = true;
@@ -355,7 +260,7 @@
     }
 
     function filterProducts(query) {
-        searchQuery = query.trim();
+        searchQuery = String(query || '').trim();
         scheduleRenderProducts();
     }
 
@@ -363,6 +268,7 @@
         const product = getProductById(productId);
         if (!product) return;
         addToCart(productId, product.sizes[0]);
+        renderCartItems();
         updateHeaderCart();
     }
 
@@ -378,46 +284,54 @@
 
         const discount = getDiscount(product.originalPrice, product.price);
         const highlights = getProductHighlights(product);
-        const source = getSourceMeta(product.source);
+
         let html = '<div class="modal-handle"></div>';
-        html += '<div class="product-detail-art"><img src="' + getProductArt(product) + '" alt="' + escapeHtml(product.name) + '"></div>';
-        html += '<div class="product-source-row">';
-        html += renderSourceBadge(product.source, false);
-        html += '<span class="badge badge-secondary">' + escapeHtml(product.category) + '</span>';
-        if (discount > 0) html += '<span class="badge badge-primary">-' + discount + '% OFF</span>';
+        html += '<div class="store-detail-head">';
+        html += '  <div>';
+        html += '    <p class="store-kicker">Exact product page</p>';
+        html += '    <h2>' + escapeHtml(product.name) + '</h2>';
+        html += '  </div>';
+        html += '  <button class="btn-icon btn-icon-text" type="button" onclick="closeProductDetail()">Close</button>';
         html += '</div>';
-        html += '<h2 style="font-size:1.3rem;font-weight:800;margin-bottom:8px;">' + escapeHtml(product.name) + '</h2>';
-        html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">';
-        html += '<span style="color:var(--warning);">&#9733; ' + escapeHtml(product.rating) + '</span>';
-        html += '<span style="color:var(--text-tertiary);font-size:0.85rem;">(' + escapeHtml(product.reviews) + ' reviews)</span>';
+        html += '<div class="store-detail-image-wrap"><img class="store-detail-image" src="' + escapeHtml(getProductArt(product)) + '" alt="' + escapeHtml(product.name) + '"></div>';
+        html += '<div class="store-detail-meta-row">';
+        html += renderSourceTag();
+        html += '<span class="store-detail-label">' + escapeHtml(product.brand) + '</span>';
+        html += '<span class="store-detail-label">' + escapeHtml(getCategoryLabel(product.category)) + '</span>';
+        if (discount > 0) html += '<span class="store-detail-label accent">-' + discount + '%</span>';
         html += '</div>';
-        html += '<p style="color:var(--text-secondary);font-size:0.9rem;line-height:1.6;margin-bottom:12px;">' + escapeHtml(product.desc) + '</p>';
-        html += '<div class="partner-note-banner" style="margin-bottom:12px;">' + escapeHtml(source.checkoutNote) + '</div>';
-        html += '<div class="product-detail-highlights">' + highlights.map(item => '<span class="product-highlight-pill">' + escapeHtml(item) + '</span>').join('') + '</div>';
-        html += '<div class="product-curation-note" style="margin-bottom:16px;">' + escapeHtml(product.curatorNote || '') + '</div>';
-        html += '<div style="margin-bottom:20px;">';
-        html += '<div style="font-size:0.85rem;font-weight:600;margin-bottom:8px;color:var(--text-secondary);">Size / Variant</div>';
-        html += '<div style="display:flex;gap:8px;flex-wrap:wrap;">';
+        html += '<p class="store-detail-copy">' + escapeHtml(product.desc) + '</p>';
+        html += '<div class="store-detail-stack">';
+        html += '  <div class="store-detail-price-wrap">';
+        html += '      <div class="store-detail-price">' + escapeHtml(formatMoney(product.price)) + '</div>';
+        html += '      <div class="store-detail-original">' + escapeHtml(formatMoney(product.originalPrice)) + '</div>';
+        html += '  </div>';
+        html += '  <div class="store-detail-rating">\u2605 ' + escapeHtml(product.rating.toFixed(1)) + ' <span>' + escapeHtml(Number(product.reviews).toLocaleString('en-IN')) + ' reviews</span></div>';
+        html += '</div>';
+        html += '<p class="store-detail-note">' + escapeHtml(getProductDeliveryText(product)) + '</p>';
+        html += '<div class="store-detail-highlights">' + highlights.map(item => '<span class="store-detail-chip">' + escapeHtml(item) + '</span>').join('') + '</div>';
+        html += '<div class="store-detail-size-row">';
         product.sizes.forEach((size, index) => {
-            html += '<button class="btn-glass' + (index === 0 ? ' active' : '') + '" onclick="selectSize(this, ' + JSON.stringify(size) + ')" data-size="' + escapeHtml(size) + '" style="padding:8px 16px;font-size:0.82rem;">' + escapeHtml(size) + '</button>';
+            html += '<button class="store-chip' + (index === 0 ? ' active' : '') + '" type="button" onclick="selectSize(this, ' + JSON.stringify(size) + ')">' + escapeHtml(size) + '</button>';
         });
-        html += '</div></div>';
-        html += '<div style="display:flex;align-items:center;justify-content:space-between;padding-top:16px;border-top:1px solid var(--border-glass);gap:12px;">';
-        html += '<div><div style="font-size:0.75rem;color:var(--text-tertiary);text-decoration:line-through;">' + escapeHtml(formatMoney(product.originalPrice)) + '</div>';
-        html += '<div style="font-size:1.5rem;font-weight:900;color:var(--secondary);">' + escapeHtml(formatMoney(product.price)) + '</div></div>';
-        html += '<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;">';
-        html += '<button class="btn-glass" onclick="openPartnerProductFromStore(' + product.id + ')">' + escapeHtml(source.ctaLabel) + '</button>';
-        html += '<button class="btn-primary" onclick="addFromDetail(' + product.id + ')" style="padding:14px 24px;">Add to Bag</button>';
-        html += '</div></div>';
-        html += '<div style="text-align:center;margin-top:16px;"><button style="background:none;color:var(--text-tertiary);font-size:0.85rem;" onclick="closeProductDetail()">Close</button></div>';
+        html += '</div>';
+        html += '<div class="store-detail-actions">';
+        html += '  <button class="market-secondary-btn" type="button" onclick="addFromDetail(' + product.id + ')">Add to cart</button>';
+        html += '  <button class="market-primary-btn" type="button" onclick="openPartnerProductFromStore(' + product.id + ')">Open on Amazon</button>';
+        html += '</div>';
 
         document.getElementById('productModalContent').innerHTML = html;
         document.getElementById('productModal').classList.add('active');
         window._selectedSize = product.sizes[0];
     }
 
+    function closeProductDetail() {
+        document.getElementById('productModal').classList.remove('active');
+    }
+
     function selectSize(button, size) {
-        button.parentElement.querySelectorAll('.btn-glass').forEach(item => item.classList.remove('active'));
+        const row = button.parentElement;
+        row.querySelectorAll('.store-chip').forEach(chip => chip.classList.remove('active'));
         button.classList.add('active');
         window._selectedSize = size;
     }
@@ -425,221 +339,103 @@
     function addFromDetail(productId) {
         addToCart(productId, window._selectedSize || '');
         closeProductDetail();
+        renderCartItems();
         updateHeaderCart();
     }
 
-    function closeProductDetail() {
-        document.getElementById('productModal').classList.remove('active');
-    }
-
-    function getCartGroups() {
-        const groups = {};
-
-        getCart().forEach(item => {
-            const product = getProductById(item.id);
-            if (!product) return;
-
-            if (!groups[product.source]) {
-                groups[product.source] = {
-                    source: product.source,
-                    items: [],
-                    total: 0,
-                    itemCount: 0
-                };
-            }
-
-            groups[product.source].items.push({
-                product: product,
-                size: item.size || '',
-                qty: item.qty
-            });
-            groups[product.source].total += product.price * item.qty;
-            groups[product.source].itemCount += item.qty;
-        });
-
-        return Object.values(groups).sort((left, right) => right.total - left.total);
-    }
-
-    function openCart() {
+    function openStoreCart() {
         renderCartItems();
         document.getElementById('cartModal').classList.add('active');
     }
 
-    function closeCart() {
+    function closeStoreCart() {
         document.getElementById('cartModal').classList.remove('active');
     }
 
-    function renderCartItems() {
-        const groups = getCartGroups();
-        const container = document.getElementById('cartItems');
-        const footer = document.getElementById('cartFooter');
-
-        if (!groups.length) {
-            container.innerHTML = '<div class="empty-state"><div class="empty-icon">Bag</div><div class="empty-title">Your bag is empty</div><div class="empty-desc">Save partner products here before handing off to the original app.</div></div>';
-            footer.style.display = 'none';
-            return;
-        }
-
-        footer.style.display = 'block';
-        container.innerHTML = groups.map(group => {
-            const source = getSourceMeta(group.source);
-            return '<div class="cart-group">' +
-                '<div class="cart-group-header">' +
-                    '<div>' +
-                        renderSourceBadge(group.source, false) +
-                        '<div style="font-size:0.78rem;color:var(--text-tertiary);margin-top:8px;">' + escapeHtml(source.checkoutNote) + '</div>' +
-                    '</div>' +
-                    '<div style="text-align:right;">' +
-                        '<div style="font-size:0.82rem;color:var(--text-secondary);">' + escapeHtml(group.itemCount) + ' item(s)</div>' +
-                        '<div style="font-size:1rem;font-weight:800;color:var(--secondary);">' + escapeHtml(formatMoney(group.total)) + '</div>' +
-                    '</div>' +
-                '</div>' +
-                group.items.map(item => {
-                    return '<div class="cart-item-row">' +
-                        '<div class="cart-item-art"><img src="' + getProductArt(item.product) + '" alt="' + escapeHtml(item.product.name) + '"></div>' +
-                        '<div style="flex:1;">' +
-                            '<div style="font-weight:600;font-size:0.9rem;">' + escapeHtml(item.product.name) + '</div>' +
-                            '<div style="font-size:0.78rem;color:var(--text-tertiary);">' + escapeHtml(item.size || '') + ' · ' + escapeHtml(formatMoney(item.product.price)) + '</div>' +
-                            '<div style="font-size:0.74rem;color:var(--text-tertiary);margin-top:4px;">' + escapeHtml(getProductDeliveryText(item.product)) + '</div>' +
-                        '</div>' +
-                        '<div class="qty-control">' +
-                            '<button onclick="updateQty(' + item.product.id + ',' + JSON.stringify(item.size || '') + ',-1)">-</button>' +
-                            '<span class="qty-value">' + escapeHtml(item.qty) + '</span>' +
-                            '<button onclick="updateQty(' + item.product.id + ',' + JSON.stringify(item.size || '') + ',1)">+</button>' +
-                        '</div>' +
-                    '</div>';
-                }).join('') +
-            '</div>';
-        }).join('');
-
-        document.getElementById('cartTotalPrice').textContent = formatMoney(getCartTotal());
-        document.getElementById('cartFooterNote').textContent = groups.length > 1
-            ? 'Your bag spans ' + groups.length + ' partner apps. Each source is opened separately.'
-            : 'Final price, offers, and delivery are confirmed in the partner app.';
-    }
-
-    function updateQty(productId, size, delta) {
+    function changeCartQty(productId, size, delta) {
         updateCartQty(productId, size, delta);
         renderCartItems();
         updateHeaderCart();
     }
 
-    function buildPartnerHandoff(product, size, qty) {
-        const source = getSourceMeta(product.source);
-        return {
-            id: 'HND-' + Date.now() + '-' + product.id,
-            createdAt: new Date().toISOString(),
-            source: product.source,
-            total: product.price * qty,
-            itemCount: qty,
-            items: [{
-                id: product.id,
-                name: product.name,
-                brand: product.brand,
-                size: size || '',
-                qty: qty,
-                price: product.price
-            }],
-            note: source.checkoutNote
-        };
+    function removeCartItem(productId, size) {
+        removeFromCart(productId, size);
+        renderCartItems();
+        updateHeaderCart();
     }
 
-    function recordPartnerHandoff(handoff) {
-        const handoffs = getPartnerHandoffs();
-        handoffs.unshift(handoff);
-        savePartnerHandoffs(handoffs);
-        renderHandoffs();
-    }
-
-    function openCheckout() {
-        if (!isLoggedIn()) {
-            closeCart();
-            window.location.href = 'login.html?redirect=store.html';
-            return;
-        }
-
-        closeCart();
-        renderCheckoutGroups();
-        document.getElementById('checkoutModal').classList.add('active');
-    }
-
-    function closeCheckout() {
-        document.getElementById('checkoutModal').classList.remove('active');
-    }
-
-    function renderCheckoutGroups() {
-        const groups = getCartGroups();
-        const container = document.getElementById('checkoutGroups');
-
-        if (!groups.length) {
-            container.innerHTML = '<div class="empty-state"><div class="empty-icon">Open</div><div class="empty-title">Nothing to hand off yet</div><div class="empty-desc">Add products to your bag first, then open each listing in the partner app.</div></div>';
-            return;
-        }
-
-        container.innerHTML = groups.map(group => {
-            const source = getSourceMeta(group.source);
-            return '<div class="checkout-group">' +
-                '<div class="cart-group-header">' +
-                    '<div>' +
-                        renderSourceBadge(group.source, false) +
-                        '<div style="font-size:0.8rem;color:var(--text-tertiary);margin-top:8px;">' + escapeHtml(source.checkoutNote) + '</div>' +
-                    '</div>' +
-                    '<div style="text-align:right;">' +
-                        '<div style="font-size:0.82rem;color:var(--text-secondary);">' + escapeHtml(group.itemCount) + ' item(s)</div>' +
-                        '<div style="font-size:1rem;font-weight:800;color:var(--secondary);">' + escapeHtml(formatMoney(group.total)) + '</div>' +
-                    '</div>' +
-                '</div>' +
-                group.items.map(item => {
-                    return '<div class="checkout-item-row">' +
-                        '<div class="checkout-item-meta">' +
-                            '<div class="checkout-item-title">' + escapeHtml(item.product.name) + '</div>' +
-                            '<div class="checkout-item-subtitle">' + escapeHtml(item.size || 'Default') + ' · Qty ' + escapeHtml(item.qty) + ' · ' + escapeHtml(formatMoney(item.product.price)) + '</div>' +
-                        '</div>' +
-                        '<button class="ghost-link-btn checkout-item-link" onclick="openCheckoutItem(' + item.product.id + ',' + JSON.stringify(item.size || '') + ',' + item.qty + ')">' + escapeHtml(source.ctaLabel) + '</button>' +
-                    '</div>';
-                }).join('') +
-            '</div>';
-        }).join('');
-    }
-
-    function openCheckoutItem(productId, size, qty) {
+    function openSavedItem(productId) {
         const product = getProductById(productId);
         if (!product) return;
+        openPartnerProduct(product);
+    }
 
-        const handoff = buildPartnerHandoff(product, size, qty);
-        recordPartnerHandoff(handoff);
-        openPartnerProduct(product, { skipToast: true });
-        showToast('Opening ' + getSourceMeta(product.source).label + ' for ' + product.name + '.', 'info');
+    function renderCartItems() {
+        const items = getCart().map(item => {
+            const product = getProductById(item.id);
+            return product ? { product: product, size: item.size || product.sizes[0] || '', qty: item.qty } : null;
+        }).filter(Boolean);
+
+        const container = document.getElementById('cartItems');
+        if (!items.length) {
+            container.innerHTML = '<div class="store-empty-state inside-modal">' +
+                '<strong>Your cart is empty.</strong>' +
+                '<p>Add a few real products first, then open the exact listing you want.</p>' +
+            '</div>';
+            return;
+        }
+
+        container.innerHTML = items.map(item => {
+            const lineTotal = item.product.price * item.qty;
+            return '<article class="store-cart-row">' +
+                '<img class="store-cart-image" src="' + escapeHtml(getProductArt(item.product)) + '" alt="' + escapeHtml(item.product.name) + '">' +
+                '<div class="store-cart-copy">' +
+                    '<div class="store-cart-top">' +
+                        '<div>' +
+                            '<div class="store-cart-title">' + escapeHtml(item.product.name) + '</div>' +
+                            '<div class="store-cart-sub">' + escapeHtml(item.product.brand) + ' \u00b7 ' + escapeHtml(item.size) + '</div>' +
+                        '</div>' +
+                        '<button class="store-inline-link" type="button" onclick="removeCartItem(' + item.product.id + ',' + JSON.stringify(item.size) + ')">Remove</button>' +
+                    '</div>' +
+                    '<div class="store-cart-bottom">' +
+                        '<div>' +
+                            '<div class="store-cart-price">' + escapeHtml(formatMoney(lineTotal)) + '</div>' +
+                            '<div class="store-cart-sub">' + escapeHtml(getProductDeliveryText(item.product)) + '</div>' +
+                        '</div>' +
+                        '<div class="store-cart-controls">' +
+                            '<div class="qty-control">' +
+                                '<button type="button" onclick="changeCartQty(' + item.product.id + ',' + JSON.stringify(item.size) + ',-1)">-</button>' +
+                                '<span class="qty-value">' + escapeHtml(item.qty) + '</span>' +
+                                '<button type="button" onclick="changeCartQty(' + item.product.id + ',' + JSON.stringify(item.size) + ',1)">+</button>' +
+                            '</div>' +
+                            '<button class="market-primary-btn compact" type="button" onclick="openSavedItem(' + item.product.id + ')">Open</button>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</article>';
+        }).join('');
     }
 
     function updateHeaderCart() {
         const count = getCartCount();
         const badge = document.getElementById('headerCartCount');
-        if (count > 0) {
-            badge.style.display = 'flex';
-            badge.textContent = count;
-        } else {
-            badge.style.display = 'none';
-        }
+        badge.textContent = count;
+        badge.style.display = count > 0 ? 'inline-flex' : 'none';
     }
 
     document.getElementById('cartModal').addEventListener('click', function(event) {
-        if (event.target === this) closeCart();
+        if (event.target === this) closeStoreCart();
     });
 
     document.getElementById('productModal').addEventListener('click', function(event) {
         if (event.target === this) closeProductDetail();
     });
 
-    document.getElementById('checkoutModal').addEventListener('click', function(event) {
-        if (event.target === this) closeCheckout();
-    });
-
-    renderHero();
-    renderSourcePills();
+    renderHeroStats();
+    renderFeaturedStrip();
     renderCategories();
-    renderHandoffs();
     scheduleRenderProducts();
+    renderCartItems();
     updateHeaderCart();
 </script>
 
