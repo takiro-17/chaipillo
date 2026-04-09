@@ -22,8 +22,8 @@
 <div id="toastContainer" class="toast-container"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../shared-supabase-client.js"></script>
-<script src="../shared-entry-bridge.js"></script>
+<script src="./shared-supabase-client.js"></script>
+<script src="./shared-entry-bridge.js"></script>
 <script src="app.js"></script>
 <script>
     initApp('explore');
@@ -102,7 +102,7 @@
             return {
                 tone: 'primary',
                 title: 'Membership active at another gym',
-                body: 'You currently have an active plan at ' + membership.gymName + '. Finish or switch that plan before joining here.'
+                body: 'You currently have an active plan at ' + membership.gymName + '. Finish, switch, or cancel that plan before joining here.'
             };
         }
 
@@ -138,7 +138,7 @@
             return {
                 label: 'Finish Current Membership First',
                 disabled: true,
-                helper: 'You already have an active plan at ' + membership.gymName + '.'
+                helper: 'You already have an active plan at ' + membership.gymName + '. Cancel it below if you want to switch gyms.'
             };
         }
 
@@ -308,6 +308,10 @@
             html += '<div style="margin-top:14px;">';
             html += '<a href="dashboard.html" class="btn-secondary" style="width:100%;display:inline-flex;padding:15px 16px;">Open My Gym</a>';
             html += '</div>';
+        } else if (membershipState === 'active_elsewhere' && membership && isMembershipActive(membership)) {
+            html += '<div style="margin-top:14px;">';
+            html += '<button class="btn-secondary" style="width:100%;display:inline-flex;justify-content:center;padding:15px 16px;border-color:rgba(255,90,95,0.32);color:var(--primary);" onclick="cancelActiveMembershipFromProfile()">Cancel Current Membership</button>';
+            html += '</div>';
         }
         html += '</div>';
 
@@ -368,7 +372,7 @@
             html += '<button class="btn-primary" style="padding:12px 24px;" onclick="submitReview()">Submit Review</button>';
         } else {
             html += '<div class="review-gate-note">';
-            html += '<div style="font-weight:700;margin-bottom:6px;">Review unlocked after you join this gym</div>';
+            html += '<div style="font-weight:700;margin-bottom:6px;">Only members of this gym can review</div>';
             html += '<div style="font-size:0.88rem;color:var(--text-secondary);line-height:1.6;">' + escapeHtml(getReviewEligibilityMessage(g)) + '</div>';
             html += '</div>';
         }
@@ -491,6 +495,7 @@
         syncApprovedEntryRequests();
         const openEntry = getOpenAttendanceEntryForGym(gym);
         const request = getLatestEntryRequestForGym(gym.id, ['pending', 'approved', 'rejected', 'cancelled', 'expired']);
+        const cooldownState = getEntryCooldownState(gym);
 
         if (openEntry) {
             hint.innerHTML = '<strong>Entry still active.</strong><br><span style="color:var(--text-secondary);font-size:0.82rem;">You checked in at ' + escapeHtml(openEntry.time || 'the gym desk') + '. Ask the admin to mark exit before requesting another code.</span>';
@@ -500,6 +505,17 @@
             button.style.opacity = '0.72';
             if (cancelButton) cancelButton.style.display = 'none';
             syncEntryRequestHintTicker(false);
+            return;
+        }
+
+        if (cooldownState && cooldownState.active) {
+            hint.innerHTML = '<strong>Re-entry cooldown active.</strong><br><span style="color:var(--text-secondary);font-size:0.82rem;">This gym allows a new request only after ' + escapeHtml(String(cooldownState.hours)) + ' hour(s) from exit. You can request again in ' + escapeHtml(formatEntryCooldownRemaining(cooldownState.remainingMs)) + ' at ' + escapeHtml(formatEntryCooldownAvailability(cooldownState)) + '.</span>';
+            hint.style.display = 'block';
+            button.disabled = true;
+            button.textContent = 'Ready in ' + formatEntryCooldownRemaining(cooldownState.remainingMs);
+            button.style.opacity = '0.72';
+            if (cancelButton) cancelButton.style.display = 'none';
+            syncEntryRequestHintTicker(true);
             return;
         }
 
@@ -593,6 +609,24 @@
 
         renderEntryRequestHint();
         showToast('Entry code cancelled. Request a new one when needed.', 'info');
+    }
+
+    async function cancelActiveMembershipFromProfile() {
+        const membership = getCurrentMembership();
+        if (!membership || !isMembershipActive(membership)) {
+            showToast('There is no active membership to cancel.', 'info');
+            return;
+        }
+
+        const shouldCancel = window.confirm('Cancel your current membership at ' + membership.gymName + '?');
+        if (!shouldCancel) return;
+
+        const result = await cancelCurrentMembership({
+            reason: 'Cancelled from gym profile'
+        });
+
+        if (!result) return;
+        renderGymProfile(gym);
     }
 
     function toggleFavProfile() {

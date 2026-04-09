@@ -1304,6 +1304,42 @@ body.dashboard-loading .dashboard-loader {
   color: #00c7aa;
 }
 
+[data-theme="dark"] .dashboard-layout {
+  background:
+    radial-gradient(circle at top left, rgba(79, 172, 254, 0.08), transparent 26%),
+    linear-gradient(180deg, #14181f 0%, #181c23 34%, #1a1d23 100%);
+}
+
+[data-theme="dark"] .sidebar,
+[data-theme="dark"] .top-nav,
+[data-theme="dark"] .clay-panel,
+[data-theme="dark"] .kpi-card,
+[data-theme="dark"] .analytics-panel,
+[data-theme="dark"] #tab-payments > .clay-panel {
+  border: 1px solid rgba(255,255,255,0.04);
+  box-shadow: 14px 14px 28px rgba(0,0,0,0.34), -6px -6px 16px rgba(55, 64, 78, 0.14);
+}
+
+[data-theme="dark"] .clay-panel,
+[data-theme="dark"] .sidebar,
+[data-theme="dark"] .top-nav {
+  background: linear-gradient(180deg, rgba(32, 37, 45, 0.98), rgba(24, 28, 35, 0.99));
+}
+
+[data-theme="dark"] .clay-panel::before,
+[data-theme="dark"] .icon-btn::before,
+[data-theme="dark"] .logo-clay-small::before {
+  box-shadow: inset 1px 1px 0 rgba(255,255,255,0.025), inset -1px -1px 0 rgba(0,0,0,0.28);
+}
+
+[data-theme="dark"] .content-wrapper {
+  scrollbar-color: rgba(92, 104, 122, 0.78) transparent;
+}
+
+[data-theme="dark"] .page-title {
+  text-shadow: 0 1px 0 rgba(0,0,0,0.28);
+}
+
 @media (max-width: 1180px) {
   .settings-grid {
     grid-template-columns: 1fr;
@@ -2294,7 +2330,9 @@ input.modal-surface-input[readonly] {
 [data-theme="dark"] .payment-dropdown-trigger,
 [data-theme="dark"] .payment-search-input,
 [data-theme="dark"] .modal-surface-input {
-  box-shadow: inset 4px 4px 10px rgba(0,0,0,0.35), inset -4px -4px 10px rgba(73, 82, 96, 0.16) !important;
+  background: linear-gradient(180deg, rgba(38, 44, 54, 0.98), rgba(29, 34, 42, 0.98)) !important;
+  border: 1px solid rgba(255,255,255,0.04) !important;
+  box-shadow: inset 1px 1px 0 rgba(255,255,255,0.045), inset -4px -4px 10px rgba(0,0,0,0.26) !important;
 }
 
 [data-theme="dark"] .edit-member-modal-card select.modal-surface-input {
@@ -2311,6 +2349,13 @@ input.modal-surface-input[readonly] {
   background: rgba(31, 36, 44, 0.98) !important;
   border-color: rgba(255,255,255,0.06);
   box-shadow: 0 18px 40px rgba(0,0,0,0.35) !important;
+}
+
+[data-theme="dark"] .edit-member-modal-card,
+[data-theme="dark"] .renew-modal-card,
+[data-theme="dark"] #paymentModal > div,
+[data-theme="dark"] #securityCodeModal > div {
+  border: 1px solid rgba(255,255,255,0.05);
 }
 
 @media (max-width: 640px) {
@@ -3765,7 +3810,8 @@ input.modal-surface-input[readonly] {
 [data-theme="dark"] .analytics-payment-row,
 [data-theme="dark"] .analytics-activity-row,
 [data-theme="dark"] .analytics-review-card {
-  background: rgba(255,255,255,0.05);
+  background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.035);
 }
 
 [data-theme="dark"] .analytics-range-switch {
@@ -3783,11 +3829,12 @@ input.modal-surface-input[readonly] {
 [data-theme="dark"] .analytics-metric-card.accent-purple,
 [data-theme="dark"] .analytics-metric-card.accent-teal {
   background: linear-gradient(145deg, rgba(40, 46, 56, 0.98), rgba(29, 34, 42, 0.98));
+  border: 1px solid rgba(255,255,255,0.035);
 }
 
 [data-theme="dark"] .analytics-metric-icon {
-  background: rgba(255,255,255,0.06);
-  box-shadow: inset 3px 3px 6px rgba(255,255,255,0.06), inset -3px -3px 6px rgba(0,0,0,0.2);
+  background: rgba(255,255,255,0.04);
+  box-shadow: inset 1px 1px 0 rgba(255,255,255,0.05), inset -2px -2px 6px rgba(0,0,0,0.24);
 }
 
 [data-theme="dark"] .analytics-traffic-track,

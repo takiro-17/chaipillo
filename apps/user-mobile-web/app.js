@@ -208,7 +208,7 @@ const GYMS = [
 ];
 
 // ─── PRODUCT DATA ───
-const PRODUCTS = [
+const LEGACY_PRODUCTS = [
   { id: 1, name: 'Whey Protein Isolate', brand: 'MuscleBlaze', price: 2499, originalPrice: 3499, rating: 4.6, reviews: 1240, category: 'protein', emoji: '🥛', desc: 'Premium whey isolate with 26g protein per serving. Zero added sugar. Fast absorbing.', sizes: ['1kg', '2kg'] },
   { id: 2, name: 'Gold Standard Whey', brand: 'Optimum Nutrition', price: 4299, originalPrice: 5199, rating: 4.8, reviews: 3420, category: 'protein', emoji: '🏆', desc: 'World\'s #1 selling whey protein. 24g protein, 5.5g BCAAs per serving.', sizes: ['2lb', '5lb'] },
   { id: 3, name: 'Plant Protein Blend', brand: 'Yoga Bar', price: 1899, originalPrice: 2299, rating: 4.4, reviews: 560, category: 'protein', emoji: '🌱', desc: 'Vegan protein from pea, brown rice & quinoa. 25g protein. Chocolate flavor.', sizes: ['1kg'] },
@@ -227,7 +227,7 @@ const PRODUCTS = [
   { id: 16, name: 'Joggers Slim Fit', brand: 'SuperFit Gear', price: 999, originalPrice: 1499, rating: 4.6, reviews: 510, category: 'clothing', emoji: '👖', desc: 'Tapered joggers with zippered pockets. Cotton-poly blend. Gym to street style.', sizes: ['S', 'M', 'L', 'XL'] }
 ];
 
-const CATEGORIES = [
+const LEGACY_CATEGORIES = [
   { id: 'all', label: '🔥 All', active: true },
   { id: 'protein', label: '🥛 Protein', active: false },
   { id: 'supplements', label: '⚡ Supplements', active: false },
@@ -235,7 +235,7 @@ const CATEGORIES = [
   { id: 'accessories', label: '🎒 Accessories', active: false }
 ];
 
-const PRODUCT_ART_THEMES = {
+const LEGACY_PRODUCT_ART_THEMES = {
   protein: { base: '#7C3AED', tint: '#C4B5FD', accent: '#FDE68A' },
   supplements: { base: '#0F766E', tint: '#5EEAD4', accent: '#FDE68A' },
   clothing: { base: '#1D4ED8', tint: '#93C5FD', accent: '#FCA5A5' },
@@ -243,6 +243,189 @@ const PRODUCT_ART_THEMES = {
 };
 
 // ─── USER STATE ───
+const PARTNER_SOURCES = {
+  amazon: {
+    id: 'amazon',
+    label: 'Amazon',
+    emblem: 'A',
+    accent: '#F59E0B',
+    tint: '#FDE68A',
+    glow: '#FFF3C4',
+    surface: 'rgba(245,158,11,0.14)',
+    ctaLabel: 'Open in Amazon',
+    checkoutLabel: 'Continue in Amazon',
+    checkoutNote: 'Final pricing, offers, and payment happen on Amazon.'
+  },
+  flipkart: {
+    id: 'flipkart',
+    label: 'Flipkart',
+    emblem: 'F',
+    accent: '#38BDF8',
+    tint: '#BAE6FD',
+    glow: '#E0F2FE',
+    surface: 'rgba(56,189,248,0.14)',
+    ctaLabel: 'Open in Flipkart',
+    checkoutLabel: 'Continue in Flipkart',
+    checkoutNote: 'Your FitConnect bag stays here, but checkout moves to Flipkart.'
+  },
+  meesho: {
+    id: 'meesho',
+    label: 'Meesho',
+    emblem: 'M',
+    accent: '#FB7185',
+    tint: '#FDA4AF',
+    glow: '#FFE4E6',
+    surface: 'rgba(251,113,133,0.14)',
+    ctaLabel: 'Open in Meesho',
+    checkoutLabel: 'Continue in Meesho',
+    checkoutNote: 'Value picks stay grouped here and open in Meesho when you are ready.'
+  },
+  zomato: {
+    id: 'zomato',
+    label: 'Zomato',
+    emblem: 'Z',
+    accent: '#EF4444',
+    tint: '#FCA5A5',
+    glow: '#FEE2E2',
+    surface: 'rgba(239,68,68,0.14)',
+    ctaLabel: 'Open in Zomato',
+    checkoutLabel: 'Continue in Zomato',
+    checkoutNote: 'Protein meal availability depends on your location in Zomato.'
+  }
+};
+
+const PRODUCTS = [
+  { id: 1, name: 'Whey Protein Isolate', brand: 'MuscleBlaze', price: 2499, originalPrice: 3499, rating: 4.6, reviews: 1240, category: 'protein', source: 'amazon', desc: 'Premium whey isolate with 26g protein per serving, shortlisted for fast post-workout recovery.', sizes: ['1kg', '2kg'], partnerQuery: 'MuscleBlaze whey protein isolate 1kg', deliveryText: 'Curated from Amazon. Final offers confirm on Amazon.', highlights: ['26g protein per scoop', 'Low sugar recovery pick', 'Trusted marketplace listing'], curatorNote: 'Picked for lean recovery stacks.' },
+  { id: 2, name: 'Gold Standard Whey', brand: 'Optimum Nutrition', price: 4299, originalPrice: 5199, rating: 4.8, reviews: 3420, category: 'protein', source: 'flipkart', desc: 'Popular whey blend with strong flavor coverage and dependable protein density.', sizes: ['2lb', '5lb'], partnerQuery: 'Optimum Nutrition Gold Standard Whey 2lb', deliveryText: 'Curated from Flipkart. Compare seller offers before payment.', highlights: ['24g whey protein', 'High review confidence', 'Strong flavor variety'], curatorNote: 'Great for users who want a proven everyday whey.' },
+  { id: 3, name: 'Plant Protein Blend', brand: 'Yoga Bar', price: 1899, originalPrice: 2299, rating: 4.4, reviews: 560, category: 'protein', source: 'amazon', desc: 'A vegan recovery option with pea and brown rice protein for lighter digestion.', sizes: ['1kg'], partnerQuery: 'Yoga Bar plant protein blend 1kg', deliveryText: 'Curated from Amazon. Good option for dairy-free users.', highlights: ['Plant-based protein', 'Digestive friendly blend', 'Single-serve simplicity'], curatorNote: 'Added for members avoiding dairy-heavy supplements.' },
+  { id: 4, name: 'Pre-Workout Surge', brand: 'Bigmuscles', price: 999, originalPrice: 1499, rating: 4.3, reviews: 890, category: 'supplements', source: 'flipkart', desc: 'A high-energy pre-workout option with caffeine support for early training sessions.', sizes: ['300g'], partnerQuery: 'Bigmuscles pre workout surge 300g', deliveryText: 'Curated from Flipkart. Ingredients and tolerance should be checked before use.', highlights: ['High-stim workout boost', 'Best for early sessions', 'Curated for advanced users'], curatorNote: 'Intended for users who already know their caffeine tolerance.' },
+  { id: 5, name: 'BCAA Energy Drink', brand: 'Fast&Up', price: 799, originalPrice: 999, rating: 4.5, reviews: 670, category: 'supplements', source: 'amazon', desc: 'Electrolyte and BCAA support for long cardio or hot-weather sessions.', sizes: ['20 tabs', '40 tabs'], partnerQuery: 'Fast&Up BCAA energy drink tablets', deliveryText: 'Curated from Amazon. Useful for training days with higher sweat loss.', highlights: ['Electrolyte support', 'Portable hydration format', 'Easy daily recovery stack'], curatorNote: 'Good fit for long sessions and outdoor training.' },
+  { id: 6, name: 'Creatine Monohydrate', brand: 'GNC', price: 1299, originalPrice: 1599, rating: 4.7, reviews: 2100, category: 'supplements', source: 'amazon', desc: 'Micronized creatine for strength and power-focused routines.', sizes: ['250g', '500g'], partnerQuery: 'GNC creatine monohydrate 250g', deliveryText: 'Curated from Amazon. Final stock depends on partner seller availability.', highlights: ['Pure creatine support', 'Strength and power focus', 'Repeat-purchase staple'], curatorNote: 'Included as a simple strength baseline supplement.' },
+  { id: 7, name: 'Compression T-Shirt', brand: 'HRX', price: 899, originalPrice: 1299, rating: 4.5, reviews: 340, category: 'clothing', source: 'flipkart', desc: 'A close-fit training tee that looks sharp in-gym and holds up through repeat washes.', sizes: ['S', 'M', 'L', 'XL'], partnerQuery: 'HRX compression t shirt men gym', deliveryText: 'Curated from Flipkart. Sizing should be checked in the partner listing.', highlights: ['Training fit silhouette', 'Quick dry fabric', 'Gym-to-street styling'], curatorNote: 'Selected to keep apparel aligned with the app vibe.' },
+  { id: 8, name: 'Training Shorts', brand: 'Performax', price: 699, originalPrice: 999, rating: 4.4, reviews: 280, category: 'clothing', source: 'meesho', desc: 'Lightweight active shorts with storage pockets and a clean minimal look.', sizes: ['S', 'M', 'L', 'XL'], partnerQuery: 'men training shorts gym quick dry', deliveryText: 'Curated from Meesho. Best for budget-friendly gym staples.', highlights: ['Budget activewear pick', 'Quick dry for cardio days', 'Pocket-friendly essential'], curatorNote: 'A lower-ticket essential that still fits the visual tone.' },
+  { id: 9, name: 'Stringer Tank', brand: 'Maniac Sport', price: 599, originalPrice: 799, rating: 4.3, reviews: 190, category: 'clothing', source: 'meesho', desc: 'Classic stringer cut for lifting days and warm weather workouts.', sizes: ['M', 'L', 'XL'], partnerQuery: 'stringer tank top gym men', deliveryText: 'Curated from Meesho. Review fit and fabric details before ordering.', highlights: ['Bodybuilding cut', 'Breathable gym layer', 'Value-focused apparel'], curatorNote: 'Added for serious lifting-day styling.' },
+  { id: 10, name: 'Gym Gloves Pro', brand: 'Kobo', price: 499, originalPrice: 799, rating: 4.2, reviews: 450, category: 'accessories', source: 'amazon', desc: 'Grip-focused gloves with wrist support for higher-volume sessions.', sizes: ['S/M', 'L/XL'], partnerQuery: 'Kobo gym gloves wrist support', deliveryText: 'Curated from Amazon. Useful for pulling volume and beginner comfort.', highlights: ['Grip support for pull days', 'Wrist support included', 'Low-ticket add-on'], curatorNote: 'A practical accessory for entry-level gym users.' },
+  { id: 11, name: 'Lifting Belt', brand: 'RDX', price: 1599, originalPrice: 2199, rating: 4.6, reviews: 820, category: 'accessories', source: 'flipkart', desc: 'Structured support belt for heavy compound lifts and more confident bracing.', sizes: ['M', 'L', 'XL'], partnerQuery: 'RDX lifting belt gym leather', deliveryText: 'Curated from Flipkart. Best for intermediate and advanced lifting routines.', highlights: ['Heavy lift support', 'Bracing confidence', 'Serious strength accessory'], curatorNote: 'Selected for users moving into heavier training blocks.' },
+  { id: 12, name: 'Shaker Bottle 700ml', brand: 'Boldfit', price: 399, originalPrice: 599, rating: 4.7, reviews: 5200, category: 'accessories', source: 'meesho', desc: 'A practical bottle for shakes, hydration, and fast carry inside the gym bag.', sizes: ['700ml'], partnerQuery: 'shaker bottle 700ml gym', deliveryText: 'Curated from Meesho. Easy add-on item for everyday use.', highlights: ['Easy daily carry', 'Simple gym essential', 'Fast utility purchase'], curatorNote: 'A low-friction everyday accessory.' },
+  { id: 13, name: 'Resistance Bands Set', brand: 'Boldfit', price: 599, originalPrice: 899, rating: 4.4, reviews: 1100, category: 'accessories', source: 'amazon', desc: 'Portable set for warmups, home workouts, and mobility sessions.', sizes: ['Set of 5'], partnerQuery: 'Boldfit resistance bands set of 5', deliveryText: 'Curated from Amazon. Useful both in-gym and at home.', highlights: ['Warmup and mobility support', 'Compact home workout kit', 'Travel-friendly format'], curatorNote: 'Included for flexibility and hotel-room training.' },
+  { id: 14, name: 'Mass Gainer 3kg', brand: 'MuscleBlaze', price: 2199, originalPrice: 2999, rating: 4.3, reviews: 780, category: 'protein', source: 'flipkart', desc: 'Calorie-dense support for hard gainers trying to push consistent surplus days.', sizes: ['3kg'], partnerQuery: 'MuscleBlaze mass gainer 3kg', deliveryText: 'Curated from Flipkart. Check flavor and calorie profile before purchase.', highlights: ['High-calorie bulking support', 'Budget-conscious weight gain', 'Good for hard gainer phases'], curatorNote: 'Added specifically for bulk-cycle users.' },
+  { id: 15, name: 'Protein Wrap Combo', brand: 'Healthy Bowl', price: 349, originalPrice: 399, rating: 4.5, reviews: 220, category: 'food', source: 'zomato', desc: 'A protein-forward meal idea saved into your bag so you can jump into the delivery app when ready.', sizes: ['Meal combo'], partnerUrl: 'https://www.zomato.com/', deliveryText: 'Curated from Zomato. Meal availability depends on your area and the live menu.', highlights: ['High-protein meal idea', 'Location-based availability', 'Fast post-workout food'], curatorNote: 'Used as a prototype for food-partner handoff flows.' },
+  { id: 16, name: 'Grilled Chicken Rice Bowl', brand: 'EatFit', price: 289, originalPrice: 339, rating: 4.4, reviews: 310, category: 'food', source: 'zomato', desc: 'Lean protein and carbs in a simple post-workout format, surfaced as a curated food pick.', sizes: ['Single bowl'], partnerUrl: 'https://www.zomato.com/', deliveryText: 'Curated from Zomato. Search opens in the partner app or site based on your location.', highlights: ['Lean protein meal', 'Fast refuel format', 'Live location-based catalog'], curatorNote: 'Best used as a nearby delivery suggestion, not fixed inventory.' }
+];
+
+const CATEGORIES = [
+  { id: 'all', label: 'All', active: true },
+  { id: 'protein', label: 'Protein', active: false },
+  { id: 'supplements', label: 'Supplements', active: false },
+  { id: 'clothing', label: 'Clothing', active: false },
+  { id: 'accessories', label: 'Accessories', active: false },
+  { id: 'food', label: 'Protein Food', active: false }
+];
+
+function getSourceMeta(sourceId) {
+  return PARTNER_SOURCES[sourceId] || {
+    id: 'partner',
+    label: 'Partner',
+    emblem: 'P',
+    accent: '#94A3B8',
+    tint: '#CBD5E1',
+    glow: '#E2E8F0',
+    surface: 'rgba(148,163,184,0.14)',
+    ctaLabel: 'Open partner listing',
+    checkoutLabel: 'Continue in partner app',
+    checkoutNote: 'Checkout continues in the partner app.'
+  };
+}
+
+function getProductById(productId) {
+  return PRODUCTS.find(product => String(product.id) === String(productId)) || null;
+}
+
+function getStorageScope(userData) {
+  const user = userData || getUserData();
+  const phone = user && user.phone ? String(user.phone).trim() : '';
+  return phone ? 'user:' + phone : 'guest';
+}
+
+function readScopedCollection(storageKey) {
+  const raw = localStorage.getItem(storageKey);
+  if (!raw) return {};
+
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      return { [getStorageScope()]: parsed };
+    }
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch (error) {
+    console.warn('Failed to parse storage for', storageKey, error);
+    return {};
+  }
+}
+
+function writeScopedCollection(storageKey, state) {
+  localStorage.setItem(storageKey, JSON.stringify(state && typeof state === 'object' ? state : {}));
+}
+
+function getScopedCollectionItems(storageKey, userData) {
+  const scope = getStorageScope(userData);
+  const state = readScopedCollection(storageKey);
+  return Array.isArray(state[scope]) ? state[scope] : [];
+}
+
+function saveScopedCollectionItems(storageKey, items, userData) {
+  const scope = getStorageScope(userData);
+  const state = readScopedCollection(storageKey);
+
+  if (Array.isArray(items) && items.length) {
+    state[scope] = items;
+  } else {
+    delete state[scope];
+  }
+
+  writeScopedCollection(storageKey, state);
+}
+
+function normalizeCartItems(items) {
+  const merged = new Map();
+
+  (Array.isArray(items) ? items : []).forEach(item => {
+    const product = getProductById(item && item.id);
+    const qty = Number(item && item.qty);
+    if (!product || !Number.isFinite(qty) || qty <= 0) return;
+
+    const size = String((item && item.size) || '');
+    const key = String(product.id) + '::' + size;
+    if (!merged.has(key)) {
+      merged.set(key, {
+        id: product.id,
+        size: size,
+        qty: 0
+      });
+    }
+    merged.get(key).qty += Math.max(1, Math.floor(qty));
+  });
+
+  return Array.from(merged.values());
+}
+
+function mergeCartItems(baseItems, incomingItems) {
+  return normalizeCartItems((Array.isArray(baseItems) ? baseItems : []).concat(Array.isArray(incomingItems) ? incomingItems : []));
+}
+
+function promoteGuestStoreStateToUser(userData) {
+  const scope = getStorageScope(userData);
+  if (scope === 'guest') return;
+
+  const state = readScopedCollection('superfit_cart');
+  const guestItems = Array.isArray(state.guest) ? state.guest : [];
+  if (!guestItems.length) return;
+
+  state[scope] = mergeCartItems(Array.isArray(state[scope]) ? state[scope] : [], guestItems);
+  delete state.guest;
+  writeScopedCollection('superfit_cart', state);
+}
+
 function getUserData() {
   const saved = localStorage.getItem('superfit_user');
   if (saved) return JSON.parse(saved);
@@ -251,6 +434,7 @@ function getUserData() {
 
 function saveUserData(data) {
   localStorage.setItem('superfit_user', JSON.stringify(data));
+  promoteGuestStoreStateToUser(data);
 }
 
 function isLoggedIn() {
@@ -272,35 +456,44 @@ function requireAuth() {
 
 // ─── CART ───
 function getCart() {
-  return JSON.parse(localStorage.getItem('superfit_cart') || '[]');
+  const cart = normalizeCartItems(getScopedCollectionItems('superfit_cart'));
+  const current = JSON.stringify(cart);
+  const stored = JSON.stringify(getScopedCollectionItems('superfit_cart'));
+  if (current !== stored) {
+    saveScopedCollectionItems('superfit_cart', cart);
+  }
+  return cart;
 }
 
 function saveCart(cart) {
-  localStorage.setItem('superfit_cart', JSON.stringify(cart));
+  saveScopedCollectionItems('superfit_cart', normalizeCartItems(cart));
   updateCartUI();
 }
 
 function addToCart(productId, size) {
+  const product = getProductById(productId);
+  if (!product) return;
   const cart = getCart();
-  const existing = cart.find(item => item.id === productId && item.size === size);
+  const normalizedSize = String(size || '');
+  const existing = cart.find(item => String(item.id) === String(product.id) && item.size === normalizedSize);
   if (existing) {
     existing.qty++;
   } else {
-    cart.push({ id: productId, size: size || '', qty: 1 });
+    cart.push({ id: product.id, size: normalizedSize, qty: 1 });
   }
   saveCart(cart);
-  showToast('Added to cart! 🛒', 'success');
+  showToast('Added to your bag.', 'success');
 }
 
 function removeFromCart(productId, size) {
   let cart = getCart();
-  cart = cart.filter(item => !(item.id === productId && item.size === size));
+  cart = cart.filter(item => !(String(item.id) === String(productId) && String(item.size) === String(size || '')));
   saveCart(cart);
 }
 
 function updateCartQty(productId, size, delta) {
   const cart = getCart();
-  const item = cart.find(i => i.id === productId && i.size === size);
+  const item = cart.find(i => String(i.id) === String(productId) && String(i.size) === String(size || ''));
   if (item) {
     item.qty += delta;
     if (item.qty <= 0) {
@@ -315,7 +508,7 @@ function getCartTotal() {
   const cart = getCart();
   let total = 0;
   cart.forEach(item => {
-    const product = PRODUCTS.find(p => p.id === item.id);
+    const product = getProductById(item.id);
     if (product) total += product.price * item.qty;
   });
   return total;
@@ -330,7 +523,8 @@ function updateCartUI() {
   const fab = document.getElementById('cartFab');
   const count = getCartCount();
   if (fab) {
-    if (count > 0) {
+    const shouldShowFab = document.body.dataset.cartFabEnabled === 'true';
+    if (shouldShowFab && count > 0) {
       fab.classList.remove('hidden');
       fab.querySelector('.cart-count').textContent = count;
     } else {
@@ -710,9 +904,9 @@ function getReviewEligibilityMessage(gym) {
   if (canReviewGym(gym)) return '';
   const membership = getCurrentMembership();
   if (membership && isMembershipActive(membership) && !isSameGymMembership(membership, gym)) {
-    return 'You can review this gym after joining it. Your active plan is at ' + membership.gymName + '.';
+    return 'Only users who have joined this gym can leave a review. Your active plan is at ' + membership.gymName + '.';
   }
-  return 'Join this gym first to leave a review.';
+  return 'Only users who have joined this gym can leave a review.';
 }
 
 function getOrders() {
@@ -723,12 +917,20 @@ function saveOrders(orders) {
   localStorage.setItem('superfit_orders', JSON.stringify(orders));
 }
 
+function getPartnerHandoffs() {
+  return getScopedCollectionItems('superfit_partner_handoffs');
+}
+
+function savePartnerHandoffs(handoffs) {
+  saveScopedCollectionItems('superfit_partner_handoffs', Array.isArray(handoffs) ? handoffs.slice(0, 20) : []);
+}
+
 function createOrderFromCart() {
   const cart = getCart();
   if (!cart.length) return null;
 
   const items = cart.map(item => {
-    const product = PRODUCTS.find(entry => entry.id === item.id);
+    const product = getProductById(item.id);
     if (!product) return null;
     return {
       id: product.id,
@@ -757,29 +959,20 @@ function createOrderFromCart() {
 }
 
 function getProductTheme(product) {
-  return PRODUCT_ART_THEMES[product.category] || PRODUCT_ART_THEMES.accessories;
+  const source = getSourceMeta(product && product.source);
+  return {
+    base: source.accent,
+    tint: source.tint,
+    accent: source.glow
+  };
 }
 
 function getProductHighlights(product) {
-  const highlights = [];
+  const highlights = Array.isArray(product && product.highlights) ? product.highlights.slice() : [];
 
-  if (product.category === 'protein') {
-    highlights.push('Fast recovery support');
-    highlights.push('High protein per serving');
-  } else if (product.category === 'supplements') {
-    highlights.push('Workout performance support');
-    highlights.push('Easy daily stack');
-  } else if (product.category === 'clothing') {
-    highlights.push('Made for training days');
-    highlights.push('Breathable active fit');
-  } else {
-    highlights.push('Built for gym carry');
-    highlights.push('Reliable everyday use');
-  }
-
-  if ((product.sizes || []).length > 1) {
+  if ((product && product.sizes || []).length > 1) {
     highlights.push((product.sizes || []).length + ' size options');
-  } else if ((product.sizes || []).length === 1) {
+  } else if ((product && product.sizes || []).length === 1) {
     highlights.push('Available in ' + product.sizes[0]);
   }
 
@@ -787,18 +980,54 @@ function getProductHighlights(product) {
 }
 
 function getProductDeliveryText(product) {
-  if (product.category === 'clothing') return 'Ships in 24 hours';
-  if (product.category === 'accessories') return 'Delivery in 2 days';
-  return 'Delivery by tomorrow';
+  return product && product.deliveryText
+    ? product.deliveryText
+    : ('Curated from ' + getSourceMeta(product && product.source).label + '. Final checkout happens in the partner app.');
+}
+
+function getProductPartnerUrl(product) {
+  if (!product) return '';
+  if (product.partnerUrl) return product.partnerUrl;
+
+  const query = encodeURIComponent(String(product.partnerQuery || product.name || '').trim());
+  if (!query) return '';
+
+  if (product.source === 'amazon') return 'https://www.amazon.in/s?k=' + query;
+  if (product.source === 'flipkart') return 'https://www.flipkart.com/search?q=' + query;
+  if (product.source === 'meesho') return 'https://www.meesho.com/search?q=' + query;
+  if (product.source === 'zomato') return 'https://www.zomato.com/';
+  return '';
+}
+
+function openPartnerProduct(product, options = {}) {
+  const url = getProductPartnerUrl(product);
+  if (!url) {
+    showToast('Partner link is unavailable right now.', 'warning');
+    return false;
+  }
+
+  const target = options.sameTab ? '_self' : '_blank';
+  const opened = window.open(url, target, target === '_blank' ? 'noopener' : undefined);
+  if (!opened && target === '_blank') {
+    window.location.href = url;
+  }
+
+  if (!options.skipToast) {
+    showToast('Opening ' + getSourceMeta(product.source).label + ' for ' + product.name + '.', 'info');
+  }
+
+  return true;
 }
 
 function getProductArt(product) {
   if (product.imageDataUri) return product.imageDataUri;
 
   const theme = getProductTheme(product);
-  const title = String(product.name || '').slice(0, 20);
-  const brand = String(product.brand || '').slice(0, 16);
-  const badge = String(product.category || 'gear').toUpperCase();
+  const source = getSourceMeta(product && product.source);
+  const title = escapeSvgText(String(product.name || '').slice(0, 20));
+  const brand = escapeSvgText(String(product.brand || '').slice(0, 16));
+  const badge = escapeSvgText(String(product.category || 'gear').toUpperCase());
+  const sourceBadge = escapeSvgText(String(source.emblem || 'P'));
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320">
       <defs>
@@ -809,18 +1038,30 @@ function getProductArt(product) {
       </defs>
       <rect width="320" height="320" rx="36" fill="#071019" />
       <circle cx="255" cy="66" r="78" fill="${theme.accent}" opacity="0.22" />
+      <circle cx="72" cy="72" r="38" fill="${theme.accent}" opacity="0.2" />
       <rect x="76" y="36" width="168" height="248" rx="26" fill="url(#bg)" />
       <rect x="105" y="22" width="110" height="28" rx="14" fill="#F8FAFC" opacity="0.9" />
+      <rect x="26" y="26" width="52" height="52" rx="18" fill="#071019" opacity="0.88" />
+      <text x="52" y="58" text-anchor="middle" font-family="Outfit, Arial, sans-serif" font-size="26" font-weight="800" fill="#F8FAFC">${sourceBadge}</text>
       <rect x="96" y="88" width="128" height="96" rx="20" fill="#0B1220" opacity="0.18" />
       <text x="160" y="116" text-anchor="middle" font-family="Outfit, Arial, sans-serif" font-size="18" font-weight="700" fill="#F8FAFC">${brand}</text>
       <text x="160" y="144" text-anchor="middle" font-family="Outfit, Arial, sans-serif" font-size="22" font-weight="800" fill="#F8FAFC">${badge}</text>
       <text x="160" y="210" text-anchor="middle" font-family="Outfit, Arial, sans-serif" font-size="24" font-weight="800" fill="#FFFFFF">${title}</text>
-      <text x="160" y="246" text-anchor="middle" font-family="Outfit, Arial, sans-serif" font-size="14" font-weight="600" fill="#E2E8F0">FitConnect Store</text>
+      <text x="160" y="246" text-anchor="middle" font-family="Outfit, Arial, sans-serif" font-size="14" font-weight="600" fill="#E2E8F0">${escapeSvgText(source.label)} curated pick</text>
     </svg>
   `;
 
   product.imageDataUri = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
   return product.imageDataUri;
+}
+
+function escapeSvgText(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 // ─── TRIALS ───
@@ -1029,7 +1270,10 @@ function getParam(key) {
 
 // ─── HELPER: Discount % ───
 function getDiscount(original, current) {
-  return Math.round(((original - current) / original) * 100);
+  if (!Number.isFinite(Number(original)) || !Number.isFinite(Number(current)) || Number(original) <= Number(current) || Number(original) <= 0) {
+    return 0;
+  }
+  return Math.round(((Number(original) - Number(current)) / Number(original)) * 100);
 }
 
 function getSupabaseClient() {
@@ -1076,7 +1320,8 @@ function buildRemoteGymCard(row) {
     plans: plans,
     offers: Array.isArray(data.offers) ? data.offers : [],
     reviews: Array.isArray(data.reviews) ? data.reviews : [],
-    trialAvailable: data.trialAvailable !== false
+    trialAvailable: data.trialAvailable !== false,
+    entryCooldownHours: normalizeEntryCooldownHours(data.entryCooldownHours)
   };
 }
 
@@ -1251,6 +1496,95 @@ async function syncUserMembershipToCloud() {
   }
 }
 
+async function cancelCurrentMembership(options) {
+  const settings = options || {};
+  const user = getUserData();
+  if (!user || !user.membership) {
+    showToast('There is no active membership to cancel.', 'info');
+    return null;
+  }
+
+  const membership = user.membership;
+  const endedAt = new Date().toISOString();
+  const currentGym = findCurrentMembershipGym();
+  const cancelReason = String(settings.reason || 'Cancelled by member');
+
+  user.membership = Object.assign({}, membership, {
+    status: 'expired',
+    expiryDate: endedAt,
+    cancelledAt: endedAt
+  });
+  saveUserData(user);
+
+  let synced = false;
+  const client = getSupabaseClient();
+  if (client && user.phone) {
+    try {
+      const gymRow = await resolveGymRowForMembership(membership);
+      const gymId = gymRow && gymRow.id ? gymRow.id : (membership.supabaseGymId || membership.gymId || null);
+      if (gymId) {
+        const localGym = currentGym || getGymById(gymId);
+        const feeAmount = getPlanPriceForGym(localGym, membership.plan);
+        const payload = {
+          gym_id: gymId,
+          member_name: user.name || 'Member',
+          member_phone: user.phone,
+          plan_name: membership.plan || 'Membership',
+          fee_amount: feeAmount,
+          payment_status: feeAmount > 0 ? 'pending' : 'completed',
+          membership_status: 'expired',
+          joined_at: membership.startDate || endedAt,
+          expires_at: endedAt,
+          source_app: 'UserApp',
+          metadata: {
+            localGymId: membership.gymId || null,
+            cancelReason: cancelReason,
+            cancelledAt: endedAt
+          }
+        };
+
+        const result = await client
+          .from('gym_memberships')
+          .upsert(payload, { onConflict: 'gym_id,member_phone' })
+          .select('id, gym_id')
+          .maybeSingle();
+
+        if (result && !result.error) {
+          synced = true;
+          if (result.data) {
+            user.membership.membershipId = result.data.id;
+            user.membership.supabaseGymId = result.data.gym_id;
+            saveUserData(user);
+          }
+        } else if (result && result.error) {
+          console.warn('Membership cancel sync failed', result.error);
+        }
+      }
+    } catch (error) {
+      console.warn('Membership cancel sync failed', error);
+    }
+  }
+
+  if (currentGym && typeof trackGymActivity === 'function') {
+    trackGymActivity(currentGym, 'Cancelled Membership', {
+      planName: membership.plan || '',
+      reason: cancelReason
+    }).catch(error => console.warn('Membership cancel activity sync failed', error));
+  }
+
+  rerenderCurrentUserAppView();
+  showToast(
+    synced
+      ? 'Membership cancelled. You can now join another gym.'
+      : 'Membership cancelled locally. Cloud sync will catch up shortly.',
+    synced ? 'success' : 'warning'
+  );
+  return {
+    synced: synced,
+    endedAt: endedAt
+  };
+}
+
 function rerenderCurrentUserAppView() {
   if (typeof window.renderOffers === 'function') window.renderOffers();
   if (typeof window.renderGyms === 'function') window.renderGyms();
@@ -1279,6 +1613,113 @@ function getEntryBridge() {
 function isMembershipActive(membership) {
   if (!membership || !membership.expiryDate) return false;
   return new Date(membership.expiryDate).getTime() >= Date.now();
+}
+
+function normalizeEntryCooldownHours(value) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) return 0;
+  return Math.min(parsed, 168);
+}
+
+function getGymEntryCooldownHours(gym) {
+  if (!gym) return 0;
+  return normalizeEntryCooldownHours(gym.entryCooldownHours);
+}
+
+function getAttendanceExitTimestamp(entry) {
+  if (!entry) return null;
+
+  if (entry.exitTimeIso) {
+    const parsedIso = new Date(entry.exitTimeIso).getTime();
+    if (!Number.isNaN(parsedIso)) return parsedIso;
+  }
+
+  if (entry.date && entry.exitTime) {
+    const parsedLocal = new Date(String(entry.date) + 'T' + String(entry.exitTime)).getTime();
+    if (!Number.isNaN(parsedLocal)) return parsedLocal;
+  }
+
+  return null;
+}
+
+function getLatestClosedAttendanceEntryForGym(gym, attendanceOverride) {
+  if (!gym) return null;
+
+  const attendance = Array.isArray(attendanceOverride) ? attendanceOverride : getUserAttendance();
+  const gymId = String(gym.supabaseGymId || gym.id || '');
+  const gymName = normalizeGymName(gym.name);
+
+  const matches = attendance.filter(entry => {
+    if (!entry || isAttendanceEntryOpen(entry)) return false;
+
+    const entryGymId = String(entry.gymId || '');
+    const entryGymName = normalizeGymName(entry.gymName);
+    if (gymId && entryGymId === gymId) return true;
+    if (gymName && entryGymName === gymName) return true;
+    return false;
+  });
+
+  if (!matches.length) return null;
+
+  matches.sort((left, right) => {
+    return (getAttendanceExitTimestamp(right) || getAttendanceEntrySortValue(right))
+      - (getAttendanceExitTimestamp(left) || getAttendanceEntrySortValue(left));
+  });
+
+  return matches[0] || null;
+}
+
+function getEntryCooldownState(gym, attendanceOverride) {
+  const cooldownHours = getGymEntryCooldownHours(gym);
+  if (!cooldownHours) {
+    return {
+      enabled: false,
+      hours: 0,
+      active: false,
+      remainingMs: 0,
+      availableAt: null,
+      lastExitAt: null
+    };
+  }
+
+  const latestClosedEntry = getLatestClosedAttendanceEntryForGym(gym, attendanceOverride);
+  const lastExitAt = getAttendanceExitTimestamp(latestClosedEntry);
+  if (!lastExitAt) {
+    return {
+      enabled: true,
+      hours: cooldownHours,
+      active: false,
+      remainingMs: 0,
+      availableAt: null,
+      lastExitAt: null
+    };
+  }
+
+  const availableAt = lastExitAt + (cooldownHours * 60 * 60 * 1000);
+  const remainingMs = Math.max(0, availableAt - Date.now());
+  return {
+    enabled: true,
+    hours: cooldownHours,
+    active: remainingMs > 0,
+    remainingMs: remainingMs,
+    availableAt: availableAt,
+    lastExitAt: lastExitAt
+  };
+}
+
+function formatEntryCooldownRemaining(ms) {
+  const totalMinutes = Math.max(1, Math.ceil((Number(ms) || 0) / 60000));
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  if (hours && minutes) return hours + 'h ' + minutes + 'm';
+  if (hours) return hours + 'h';
+  return minutes + 'm';
+}
+
+function formatEntryCooldownAvailability(state) {
+  if (!state || !state.availableAt) return '';
+  return new Date(state.availableAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
 function getEntryRequestMeta(request) {
@@ -1966,6 +2407,19 @@ async function createEntryRequest(gym) {
     return null;
   }
 
+  const cooldownState = getEntryCooldownState(gym);
+  if (cooldownState.active) {
+    showToast(
+      'You can request the next entry in '
+        + formatEntryCooldownRemaining(cooldownState.remainingMs)
+        + '. Available after '
+        + formatEntryCooldownAvailability(cooldownState)
+        + '.',
+      'info'
+    );
+    return null;
+  }
+
   retireStalePendingEntryRequests(currentGymId);
 
   const createdRequest = bridge.createRequest({
@@ -2120,22 +2574,94 @@ async function mergeRemoteGymsIntoCatalog() {
   }
 }
 
+let liveCloudRefreshPromise = null;
+let liveCloudRefreshTimer = null;
+
+async function refreshVisibleCloudState(options) {
+  const settings = options || {};
+  if (liveCloudRefreshPromise) return liveCloudRefreshPromise;
+
+  liveCloudRefreshPromise = (async function() {
+    let changed = false;
+
+    try {
+      const gymUpdates = await mergeRemoteGymsIntoCatalog();
+      if (Array.isArray(gymUpdates) && gymUpdates.length) changed = true;
+    } catch (error) {
+      console.warn('Gym refresh failed', error);
+    }
+
+    if (settings.includeMembership) {
+      try {
+        const membershipRow = await syncCurrentMembershipFromCloud();
+        if (membershipRow) changed = true;
+      } catch (error) {
+        console.warn('Membership refresh failed', error);
+      }
+    }
+
+    try {
+      const attendanceChanged = await syncAttendanceLogsFromCloud({ force: true, minIntervalMs: 0 });
+      if (attendanceChanged) changed = true;
+    } catch (error) {
+      console.warn('Attendance refresh failed', error);
+    }
+
+    if (changed) {
+      rerenderCurrentUserAppView();
+    }
+
+    return changed;
+  })();
+
+  try {
+    return await liveCloudRefreshPromise;
+  } finally {
+    liveCloudRefreshPromise = null;
+  }
+}
+
+function syncVisibleCloudRefreshTimer() {
+  if (liveCloudRefreshTimer) {
+    clearInterval(liveCloudRefreshTimer);
+    liveCloudRefreshTimer = null;
+  }
+
+  if (document.hidden) return;
+
+  liveCloudRefreshTimer = setInterval(() => {
+    refreshVisibleCloudState().catch(error => console.warn('Cloud refresh failed', error));
+  }, 5000);
+}
+
 function bindCloudRefresh() {
   if (window._userCloudRefreshBound) return;
   window._userCloudRefreshBound = true;
 
+  function refreshNow(includeMembership) {
+    refreshVisibleCloudState({ includeMembership: !!includeMembership }).catch(error => console.warn('Cloud refresh failed', error));
+  }
+
   window.addEventListener('focus', () => {
-    warmCloudState().catch(error => console.warn('Cloud refresh failed', error));
+    refreshNow(true);
   });
 
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) {
-      warmCloudState().catch(error => console.warn('Cloud refresh failed', error));
+      refreshNow(true);
     }
+    syncVisibleCloudRefreshTimer();
   });
+
+  syncVisibleCloudRefreshTimer();
 }
 
-function initApp(activePage) {
+function initApp(activePage, options = {}) {
+  const config = Object.assign({
+    showCartFab: activePage === 'store'
+  }, options);
+
+  document.body.dataset.cartFabEnabled = config.showCartFab ? 'true' : 'false';
   renderAmbientBg();
   renderBottomNav(activePage);
   updateCartUI();

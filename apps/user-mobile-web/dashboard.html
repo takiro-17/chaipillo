@@ -42,8 +42,8 @@
 <div id="toastContainer" class="toast-container"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../shared-supabase-client.js"></script>
-<script src="../shared-entry-bridge.js"></script>
+<script src="./shared-supabase-client.js"></script>
+<script src="./shared-entry-bridge.js"></script>
 <script src="app.js"></script>
 <script>
     initApp('dashboard');
@@ -95,6 +95,11 @@
         return membershipGym ? getOpenAttendanceEntryForGym(membershipGym, attendanceOverride) : null;
     }
 
+    function getDashboardCooldownState(membership, attendanceOverride) {
+        const membershipGym = getDashboardMembershipGym(membership);
+        return membershipGym ? getEntryCooldownState(membershipGym, attendanceOverride) : null;
+    }
+
     function getLatestRequestBadgeClass(request) {
         if (!request) return 'badge-accent';
         if (request.status === 'approved') return 'badge-secondary';
@@ -113,9 +118,18 @@
         }
 
         if (request.status === 'approved') {
-            const openEntry = getDashboardOpenEntry((getUserData() || {}).membership || null);
+            const membership = (getUserData() || {}).membership || null;
+            const openEntry = getDashboardOpenEntry(membership);
             if (openEntry) {
                 return 'Approved at ' + requestTime + '. You are still checked in from ' + openEntry.time + '. Ask the admin to mark your exit before requesting another code.';
+            }
+            const cooldownState = getDashboardCooldownState(membership);
+            if (cooldownState && cooldownState.active) {
+                return 'Approved at ' + requestTime + '. Your exit is complete, and the next request opens in '
+                    + formatEntryCooldownRemaining(cooldownState.remainingMs)
+                    + ' at '
+                    + formatEntryCooldownAvailability(cooldownState)
+                    + '.';
             }
             return 'Approved at ' + requestTime + '. This visit has already been added to your attendance.';
         }
@@ -143,9 +157,17 @@
         if (!button) return;
         const membership = (getUserData() || {}).membership || null;
         const openEntry = getDashboardOpenEntry(membership);
+        const cooldownState = getDashboardCooldownState(membership);
 
         if (openEntry) {
             button.textContent = 'Awaiting Exit';
+            button.disabled = true;
+            button.style.opacity = '0.72';
+            return;
+        }
+
+        if (cooldownState && cooldownState.active) {
+            button.textContent = 'Ready in ' + formatEntryCooldownRemaining(cooldownState.remainingMs);
             button.disabled = true;
             button.style.opacity = '0.72';
             return;
@@ -204,7 +226,19 @@
         syncRequestEntryButtonState(request);
         syncEntryModalState(request);
 
-        if (!statusBadge || !code || !note || !actions || !request) return;
+        if (!statusBadge || !code || !note || !actions) return;
+
+        if (!request) {
+            const cooldownState = getDashboardCooldownState(membership);
+            if (cooldownState && cooldownState.active) {
+                statusBadge.className = 'badge badge-warning';
+                statusBadge.textContent = 'cooldown';
+                code.textContent = 'Ready in ' + formatEntryCooldownRemaining(cooldownState.remainingMs);
+                note.textContent = 'Your gym allows a new entry request only after ' + cooldownState.hours + ' hour(s) from exit. You can request again at ' + formatEntryCooldownAvailability(cooldownState) + '.';
+                actions.innerHTML = '';
+            }
+            return;
+        }
 
         statusBadge.className = 'badge ' + getLatestRequestBadgeClass(request);
         statusBadge.textContent = request.status;
@@ -252,6 +286,7 @@
         const streak = calculateStreak(attendance);
         const latestRequest = getLatestMembershipRequest(membership);
         const openEntry = getDashboardOpenEntry(membership, attendance);
+        const cooldownState = getDashboardCooldownState(membership, attendance);
 
         let html = '';
         html += '<div style="margin-bottom:24px;">';
@@ -294,7 +329,11 @@
                 html += '<button class="btn-primary" id="requestEntryButton" style="width:100%;padding:16px;margin-bottom:16px;font-size:1.02rem;' + (openEntry ? 'opacity:0.72;' : '') + '" onclick="requestEntryOTP()"' + (openEntry ? ' disabled' : '') + '>';
                 html += latestRequest && latestRequest.status === 'pending'
                     ? 'Show Active Entry Code'
-                    : (openEntry ? 'Awaiting Exit' : 'Request Entry Code');
+                    : (openEntry
+                        ? 'Awaiting Exit'
+                        : (cooldownState && cooldownState.active
+                            ? 'Ready in ' + formatEntryCooldownRemaining(cooldownState.remainingMs)
+                            : 'Request Entry Code'));
                 html += '</button>';
             } else {
                 html += '<div class="glass-card-static dashboard-note-card" style="padding:16px;margin-bottom:16px;">';
@@ -312,6 +351,16 @@
                 html += '<div id="latestEntryRequestCode" style="font-size:1.4rem;font-weight:900;color:var(--secondary);letter-spacing:4px;margin-bottom:8px;">' + latestRequest.otp + '</div>';
                 html += '<div id="latestEntryRequestNote" style="font-size:0.84rem;color:var(--text-secondary);line-height:1.6;">' + getLatestRequestMessage(latestRequest) + '</div>';
                 html += '<div id="latestEntryRequestActions">' + renderLatestRequestActions(latestRequest) + '</div>';
+                html += '</div>';
+            } else if (cooldownState && cooldownState.active) {
+                html += '<div class="glass-card-static dashboard-note-card" style="padding:16px;margin-bottom:20px;">';
+                html += '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;">';
+                html += '<div style="font-weight:700;">Re-entry cooldown</div>';
+                html += '<span class="badge badge-warning">cooldown</span>';
+                html += '</div>';
+                html += '<div id="latestEntryRequestCode" style="font-size:1rem;font-weight:800;color:var(--warning);letter-spacing:0.02em;margin-bottom:8px;">Ready in ' + formatEntryCooldownRemaining(cooldownState.remainingMs) + '</div>';
+                html += '<div id="latestEntryRequestNote" style="font-size:0.84rem;color:var(--text-secondary);line-height:1.6;">Your gym allows a new entry request only after ' + cooldownState.hours + ' hour(s) from exit. You can request again at ' + formatEntryCooldownAvailability(cooldownState) + '.</div>';
+                html += '<div id="latestEntryRequestActions"></div>';
                 html += '</div>';
             }
         } else {
@@ -383,7 +432,7 @@
 
         container.innerHTML = html;
         refreshLatestEntryRequestState(latestRequest);
-        syncDashboardEntryTicker(!!(latestRequest && latestRequest.status === 'pending'));
+        syncDashboardEntryTicker(!!((latestRequest && latestRequest.status === 'pending') || openEntry || (cooldownState && cooldownState.active)));
     }
 
     async function requestEntryOTP() {
