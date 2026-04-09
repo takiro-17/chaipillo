@@ -8,6 +8,7 @@
         if (!window.supabase || typeof window.supabase.createClient !== 'function') return null;
 
         window._fitconnectSupabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        window.supabaseAPI = window._fitconnectSupabaseClient;
         return window._fitconnectSupabaseClient;
     }
 
@@ -17,4 +18,5 @@
     };
 
     window.getFitConnectSupabase = getClient;
+    window.supabaseAPI = getClient();
 })();
