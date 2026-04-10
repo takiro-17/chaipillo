@@ -10,8 +10,8 @@
     <script>
         // Apply saved theme instantly to prevent flash of wrong theme
         (function() {
-            var t = localStorage.getItem('superfit_theme');
-            if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+            var t = localStorage.getItem('superfit_theme') || 'dark';
+            if (t !== 'light') document.documentElement.setAttribute('data-theme', 'dark');
         })();
     </script>
 </head>
@@ -4890,8 +4890,8 @@
         }
 
         function loadTheme() {
-            var saved = localStorage.getItem('superfit_theme') || 'light';
-            applyTheme(saved === 'dark' ? 'dark' : 'light');
+            var saved = localStorage.getItem('superfit_theme') || 'dark';
+            applyTheme(saved === 'light' ? 'light' : 'dark');
         }
 
         window.addEventListener('storage', function(e) {
