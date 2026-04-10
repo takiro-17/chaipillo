@@ -5653,6 +5653,7 @@
                 loadData();
                 await bindGymMembershipRealtime();
                 bindRealtimeRequests();
+                bindLiveRequestActions();
                 renderLiveRequests();
                 renderChat();
                 renderNotifications();
@@ -5771,6 +5772,26 @@
             }
         }
 
+        function bindLiveRequestActions() {
+            var container = document.getElementById('liveRequestsList');
+            if (!container || container.dataset.entryActionsBound === 'true') return;
+            container.dataset.entryActionsBound = 'true';
+            container.addEventListener('click', function(event) {
+                var button = event.target && event.target.closest
+                    ? event.target.closest('[data-entry-request-action]')
+                    : null;
+                if (!button || !container.contains(button)) return;
+
+                event.preventDefault();
+                var requestId = button.getAttribute('data-entry-request-id');
+                var action = button.getAttribute('data-entry-request-action');
+                var requestName = button.getAttribute('data-entry-request-name') || 'Member';
+                if (!requestId || !action) return;
+
+                processRequest(requestId, action === 'approve', requestName);
+            });
+        }
+
         function renderLiveRequests() {
             var container = document.getElementById('liveRequestsList');
             var badge = document.getElementById('requestCountBadge');
@@ -5801,8 +5822,8 @@
                         '</div>' +
                     '</div>' +
                     '<div class="entry-request-actions">' +
-                        '<button type="button" class="entry-request-btn text reject" aria-label="Reject request for ' + escapeHTML(req.name) + '" onclick="processRequest(\'' + safeId + '\', false, \'' + safeName + '\')">Reject</button>' +
-                        '<button type="button" class="entry-request-btn text approve" aria-label="Verify request for ' + escapeHTML(req.name) + '" onclick="processRequest(\'' + safeId + '\', true, \'' + safeName + '\')">Verify</button>' +
+                        '<button type="button" class="entry-request-btn text reject" aria-label="Reject request for ' + escapeHTML(req.name) + '" data-entry-request-action="reject" data-entry-request-id="' + escapeHTML(safeId) + '" data-entry-request-name="' + escapeHTML(safeName) + '">Reject</button>' +
+                        '<button type="button" class="entry-request-btn text approve" aria-label="Accept request for ' + escapeHTML(req.name) + '" data-entry-request-action="approve" data-entry-request-id="' + escapeHTML(safeId) + '" data-entry-request-name="' + escapeHTML(safeName) + '">Accept</button>' +
                     '</div>' +
                 '</div>';
             });

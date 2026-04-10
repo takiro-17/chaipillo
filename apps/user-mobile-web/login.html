@@ -31,13 +31,13 @@
                     <label style="font-size:0.8rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:8px;">Phone Number</label>
                     <div style="display:flex; gap:8px;">
                         <div style="padding:14px 12px; background:var(--bg-input); border:1px solid var(--border-glass); border-radius:var(--radius-md); color:var(--text-secondary); font-size:0.95rem; font-weight:600; white-space:nowrap;">🇮🇳 +91</div>
-                        <input type="tel" id="phoneInput" class="input-glass" placeholder="9876543210" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')" style="flex:1;">
+                        <input type="tel" id="phoneInput" class="input-glass" placeholder="9876543210" maxlength="10" inputmode="numeric" autocomplete="tel" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)" style="flex:1;">
                     </div>
                 </div>
 
                 <div style="margin-bottom:18px;">
                     <label style="font-size:0.8rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:8px;">Your Name</label>
-                    <input type="text" id="nameInput" class="input-glass" placeholder="Enter your name">
+                    <input type="text" id="nameInput" class="input-glass" placeholder="Enter your name" maxlength="60" autocomplete="name" oninput="this.value=this.value.replace(/[0-9]/g,'')">
                 </div>
 
                 <div id="phoneError" style="display:none; background:var(--primary-soft); color:var(--primary); padding:10px 16px; border-radius:var(--radius-sm); font-size:0.85rem; font-weight:600; margin-bottom:16px; text-align:center;"></div>
@@ -97,8 +97,8 @@
 <div id="toastContainer" class="toast-container"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../shared-supabase-client.js"></script>
-<script src="../shared-entry-bridge.js"></script>
+<script src="./shared-supabase-client.js"></script>
+<script src="./shared-entry-bridge.js"></script>
 <script src="app.js"></script>
 <script>
     renderAmbientBg();
@@ -143,6 +143,36 @@
 
         showToast('OTP sent to +91 ' + phone, 'info');
     }
+
+    window.sendOTP = function() {
+        const phoneResult = validateIndianPhone(document.getElementById('phoneInput').value);
+        const nameResult = validatePersonName(document.getElementById('nameInput').value);
+        const errorBox = document.getElementById('phoneError');
+        errorBox.style.display = 'none';
+
+        if (!phoneResult.valid) {
+            errorBox.textContent = phoneResult.message;
+            errorBox.style.display = 'block';
+            return;
+        }
+        if (!nameResult.valid) {
+            errorBox.textContent = nameResult.message;
+            errorBox.style.display = 'block';
+            return;
+        }
+
+        pendingPhone = phoneResult.value;
+        pendingName = nameResult.value;
+        document.getElementById('phoneInput').value = pendingPhone;
+        document.getElementById('nameInput').value = pendingName;
+        document.getElementById('otpPhone').textContent = '+91 ' + pendingPhone.slice(0, 5) + '***' + pendingPhone.slice(8);
+        document.getElementById('authStep1').style.display = 'none';
+        document.getElementById('authStep2').style.display = 'block';
+        setTimeout(() => {
+            document.querySelector('#otpGroup input').focus();
+        }, 100);
+        showToast('OTP sent to +91 ' + pendingPhone, 'info');
+    };
 
     function otpAutoTab(input, index) {
         input.value = input.value.replace(/[^0-9]/g, '');

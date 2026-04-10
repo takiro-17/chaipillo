@@ -31,11 +31,11 @@
         
         <div style="margin-bottom:16px;">
             <label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:8px;">Name</label>
-            <input type="text" class="input-glass" id="editName" placeholder="Your name">
+            <input type="text" class="input-glass" id="editName" placeholder="Your name" maxlength="60" autocomplete="name" oninput="this.value=this.value.replace(/[0-9]/g,'')">
         </div>
         <div style="margin-bottom:16px;">
             <label style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:8px;">Phone</label>
-            <input type="tel" class="input-glass" id="editPhone" placeholder="Phone number" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+            <input type="tel" class="input-glass" id="editPhone" placeholder="Phone number" maxlength="10" inputmode="numeric" autocomplete="tel" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)">
         </div>
 
         <div style="display:flex;gap:12px;margin-top:24px;">
@@ -66,11 +66,20 @@
 <div id="toastContainer" class="toast-container"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../shared-supabase-client.js"></script>
-<script src="../shared-entry-bridge.js"></script>
+<script src="./shared-supabase-client.js"></script>
+<script src="./shared-entry-bridge.js"></script>
 <script src="app.js"></script>
 <script>
     initApp('profile');
+
+    function profileEscape(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
 
     function renderProfile() {
         const container = document.getElementById('profileContent');
@@ -91,8 +100,8 @@
 
         // ── Profile Card ──
         html += '<div class="liquid-glass" style="padding:28px;margin-bottom:24px;text-align:center;">';
-        html += '<div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--purple));display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 12px;box-shadow:0 8px 30px var(--primary-glow);">' + user.name.charAt(0).toUpperCase() + '</div>';
-        html += '<h2 style="font-size:1.3rem;font-weight:800;">' + user.name + '</h2>';
+        html += '<div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--purple));display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 12px;box-shadow:0 8px 30px var(--primary-glow);">' + profileEscape(String(user.name || 'M').charAt(0).toUpperCase()) + '</div>';
+        html += '<h2 style="font-size:1.3rem;font-weight:800;">' + profileEscape(user.name) + '</h2>';
         html += '<p style="color:var(--text-secondary);font-size:0.88rem;">📱 +91 ' + user.phone + '</p>';
         html += '<p style="color:var(--text-tertiary);font-size:0.78rem;margin-top:4px;">Member since ' + new Date(user.joinDate).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }) + '</p>';
         html += '<button class="btn-glass" style="margin-top:14px;padding:10px 20px;" onclick="openEditModal()">✏️ Edit Profile</button>';
@@ -186,6 +195,23 @@
     }
 
     // ── Favorites ──
+    window.saveProfile = function() {
+        const nameResult = validatePersonName(document.getElementById('editName').value);
+        const phoneResult = validateIndianPhone(document.getElementById('editPhone').value);
+        if (!nameResult.valid) { showToast(nameResult.message, 'warning'); return; }
+        if (!phoneResult.valid) { showToast(phoneResult.message, 'warning'); return; }
+
+        const user = getUserData();
+        user.name = nameResult.value;
+        user.phone = phoneResult.value;
+        document.getElementById('editName').value = nameResult.value;
+        document.getElementById('editPhone').value = phoneResult.value;
+        saveUserData(user);
+        closeEditModal();
+        renderProfile();
+        showToast('Profile updated.', 'success');
+    };
+
     function openFavsModal() {
         const favs = getFavorites();
         const container = document.getElementById('favsList');

@@ -506,6 +506,46 @@ function isLoggedIn() {
   return !!getUserData();
 }
 
+function normalizePersonName(value) {
+  return String(value || '').trim().replace(/\s+/g, ' ');
+}
+
+function validatePersonName(value) {
+  const name = normalizePersonName(value);
+  if (!name) return { valid: false, value: '', message: 'Please enter your name.' };
+  if (name.length < 2) return { valid: false, value: name, message: 'Name must be at least 2 characters.' };
+  if (name.length > 60) return { valid: false, value: name, message: 'Name must be 60 characters or less.' };
+  if (/\d/.test(name)) return { valid: false, value: name, message: 'Name cannot contain numbers.' };
+
+  try {
+    if (!/^[\p{L}][\p{L}\s.'-]*[\p{L}]$/u.test(name) && !/^[\p{L}]{2}$/u.test(name)) {
+      return { valid: false, value: name, message: 'Use a real name with letters only.' };
+    }
+  } catch (error) {
+    if (!/^[A-Za-z][A-Za-z\s.'-]*[A-Za-z]$/.test(name) && !/^[A-Za-z]{2}$/.test(name)) {
+      return { valid: false, value: name, message: 'Use a real name with letters only.' };
+    }
+  }
+
+  return { valid: true, value: name, message: '' };
+}
+
+function normalizeIndianPhone(value) {
+  return String(value || '').replace(/\D/g, '').slice(-10);
+}
+
+function validateIndianPhone(value) {
+  const phone = normalizeIndianPhone(value);
+  if (!phone) return { valid: false, value: '', message: 'Please enter your phone number.' };
+  if (!/^[6-9]\d{9}$/.test(phone)) {
+    return { valid: false, value: phone, message: 'Enter a valid 10-digit Indian mobile number.' };
+  }
+  if (/^(\d)\1{9}$/.test(phone)) {
+    return { valid: false, value: phone, message: 'Phone number cannot be the same digit repeated.' };
+  }
+  return { valid: true, value: phone, message: '' };
+}
+
 function logout() {
   localStorage.removeItem('superfit_user');
   window.location.href = 'login.html';
@@ -2631,8 +2671,11 @@ async function mergeRemoteGymsIntoCatalog() {
       );
 
       if (existingIndex >= 0) {
-        GYMS[existingIndex] = Object.assign({}, GYMS[existingIndex], gymCard);
-        changed.push(GYMS[existingIndex]);
+        const mergedGym = Object.assign({}, GYMS[existingIndex], gymCard);
+        if (JSON.stringify(mergedGym) !== JSON.stringify(GYMS[existingIndex])) {
+          GYMS[existingIndex] = mergedGym;
+          changed.push(mergedGym);
+        }
       } else {
         GYMS.unshift(gymCard);
         changed.push(gymCard);
@@ -2665,8 +2708,9 @@ async function refreshVisibleCloudState(options) {
 
     if (settings.includeMembership) {
       try {
-        const membershipRow = await syncCurrentMembershipFromCloud();
-        if (membershipRow) changed = true;
+        const previousUserState = localStorage.getItem('superfit_user');
+        await syncCurrentMembershipFromCloud();
+        if (localStorage.getItem('superfit_user') !== previousUserState) changed = true;
       } catch (error) {
         console.warn('Membership refresh failed', error);
       }
@@ -2703,7 +2747,7 @@ function syncVisibleCloudRefreshTimer() {
 
   liveCloudRefreshTimer = setInterval(() => {
     refreshVisibleCloudState().catch(error => console.warn('Cloud refresh failed', error));
-  }, 5000);
+  }, 30000);
 }
 
 function bindCloudRefresh() {
