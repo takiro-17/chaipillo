@@ -807,58 +807,113 @@
 
                 <!-- ============ COMMUNITY TAB ============ -->
                 <div id="tab-community" class="tab-pane" style="display: none;">
-                    <h1 class="page-title">💬 Gym Community</h1>
-                    <p style="color: var(--text-light); margin-bottom: 1rem;">A group space for announcements, replies, photos, and quick member conversations.</p>
-                    
-                    <div class="chat-shell clay-panel">
-                        <div class="chat-group-header">
-                            <div class="chat-group-profile">
-                                <div class="chat-group-avatar" id="chatGroupAvatar">SF</div>
-                                <div>
-                                    <strong id="chatGroupName">SuperFit Community</strong>
-                                    <p id="chatGroupMeta">0 members • announcements and replies</p>
+                    <div class="wa-community-shell">
+
+                        <!-- LEFT PANEL: Sidebar -->
+                        <div class="wa-sidebar">
+                            <div class="wa-sidebar-header">
+                                <div class="wa-sidebar-title">Community</div>
+                                <div class="wa-sidebar-actions">
+                                    <button class="wa-icon-btn" onclick="openCommunityMembersModal()" title="Members">👥</button>
+                                    <button class="wa-icon-btn" onclick="document.getElementById('communityLogoInput').click()" title="Change Logo">🖼️</button>
+                                    <input type="file" id="communityLogoInput" accept="image/*" style="display:none;" onchange="uploadGymLogo(this)">
                                 </div>
                             </div>
-                            <div class="chat-group-tools">
-                                <span class="chat-group-chip" id="chatLiveStatus">Owner active</span>
-                                <button type="button" class="chat-header-btn" onclick="openCommunityMembersModal()">Members</button>
-                                <button type="button" class="chat-header-btn" onclick="document.getElementById('communityLogoInput').click()">Logo</button>
-                                <input type="file" id="communityLogoInput" accept="image/*" style="display:none;" onchange="uploadGymLogo(this)">
+                            <div class="wa-sidebar-search">
+                                <input type="text" placeholder="🔍 Search or filter..." id="communitySearchInput" oninput="filterCommunityChats(this.value)">
+                            </div>
+                            <!-- Channels list -->
+                            <div class="wa-channels-list" id="waChannelsList">
+                                <div class="wa-channel-item active" onclick="switchChannel('group')" data-channel="group">
+                                    <div class="wa-channel-avatar" id="chatGroupAvatar">SF</div>
+                                    <div class="wa-channel-info">
+                                        <div class="wa-channel-name" id="chatGroupName">SuperFit Community</div>
+                                        <div class="wa-channel-preview" id="waGroupPreview">No messages yet</div>
+                                    </div>
+                                    <div class="wa-channel-meta">
+                                        <div class="wa-channel-time" id="waGroupTime"></div>
+                                        <div class="wa-channel-badge" id="waGroupBadge" style="display:none;"></div>
+                                    </div>
+                                </div>
+                                <div class="wa-channel-item" onclick="switchChannel('announcements')" data-channel="announcements">
+                                    <div class="wa-channel-avatar" style="background: linear-gradient(135deg,#f7971e,#ffd200);">📢</div>
+                                    <div class="wa-channel-info">
+                                        <div class="wa-channel-name">Announcements</div>
+                                        <div class="wa-channel-preview">Owner-only broadcasts</div>
+                                    </div>
+                                    <div class="wa-channel-meta">
+                                        <div class="wa-channel-time"></div>
+                                    </div>
+                                </div>
+                                <div class="wa-sidebar-section-label">Members</div>
+                                <div id="waMemberDmList"><!-- DM list populated by JS --></div>
                             </div>
                         </div>
 
-                        <div class="chat-quick-actions">
-                        <button class="chat-quick-btn" onclick="quickSend('📢 Gym will be closed tomorrow for maintenance. Stay fit at home! 💪')">📢 Closure Notice</button>
-                        <button class="chat-quick-btn" onclick="quickSend('🎉 New batch starting next Monday! Register now to claim your spot. Limited seats.')">🎉 New Batch</button>
-                        <button class="chat-quick-btn" onclick="quickSend('💰 Special offer: Refer a friend and get 1 month FREE! Limited time only.')">💰 Referral Offer</button>
-                        <button class="chat-quick-btn" onclick="quickSend('🕐 Reminder: Gym timings changed to 6 AM - 10 PM starting this week.')">🕐 Timing Update</button>
-                        <button class="chat-quick-btn" onclick="quickSend('🏆 Congratulations to all members who completed this month\'s fitness challenge! Results coming soon.')">🏆 Challenge Update</button>
-                    </div>
+                        <!-- RIGHT PANEL: Chat Area -->
+                        <div class="wa-chat-area">
+                            <!-- Chat Header -->
+                            <div class="wa-chat-header">
+                                <button class="wa-icon-btn wa-back-btn" onclick="closeMobileChat()" style="display:none;">←</button>
+                                <div class="wa-chat-header-avatar" id="waChatHeaderAvatar">SF</div>
+                                <div class="wa-chat-header-info">
+                                    <div class="wa-chat-header-name" id="waChatHeaderName">SuperFit Community</div>
+                                    <div class="wa-chat-header-sub" id="chatGroupMeta">0 members • tap to view info</div>
+                                </div>
+                                <div class="wa-chat-header-tools">
+                                    <span class="wa-online-badge" id="chatLiveStatus">● Active</span>
+                                    <button class="wa-icon-btn" onclick="openCommunityMembersModal()" title="View Members">👥</button>
+                                </div>
+                            </div>
 
-                    <div class="chat-wrapper" style="padding: 0 1rem 1rem; overflow: hidden;">
-                        <div class="chat-container" id="chatContainer">
-                            <div class="chat-empty-state" id="chatEmptyState">
-                                <div class="chat-empty-icon">💬</div>
-                                <p style="font-weight: 600; font-size: 1.1rem;">No messages yet</p>
-                                <p style="font-size: 0.85rem;">Start with a quick update, welcome message, or a photo from the gym floor.</p>
+                            <!-- Quick Actions Bar -->
+                            <div class="wa-quick-bar" id="waQuickBar">
+                                <button class="wa-quick-chip" onclick="quickSend('📢 Gym will be closed tomorrow for maintenance. Stay fit! 💪')">📢 Closure</button>
+                                <button class="wa-quick-chip" onclick="quickSend('🎉 New batch starting Monday! Limited seats — register now.')">🎉 New Batch</button>
+                                <button class="wa-quick-chip" onclick="quickSend('💰 Refer a friend → get 1 month FREE! Limited time.')">💰 Referral</button>
+                                <button class="wa-quick-chip" onclick="quickSend('🕐 Gym timings updated: 6 AM – 10 PM this week.')">🕐 Timings</button>
+                                <button class="wa-quick-chip" onclick="quickSend('🏆 Challenge complete! Results dropping soon. Stay tuned 🔥')">🏆 Challenge</button>
+                            </div>
+
+                            <!-- Messages -->
+                            <div class="wa-messages" id="chatContainer">
+                                <div class="chat-empty-state" id="chatEmptyState">
+                                    <div class="chat-empty-icon">💬</div>
+                                    <p style="font-weight: 600; font-size: 1.1rem;">No messages yet</p>
+                                    <p style="font-size: 0.85rem; opacity:0.7;">Send an announcement, photo, or welcome message.</p>
+                                </div>
+                            </div>
+
+                            <!-- Input Bar -->
+                            <div class="wa-input-bar">
+                                <div class="wa-attach-menu" id="waAttachMenu" style="display:none;">
+                                    <button class="wa-attach-option" onclick="document.getElementById('chatPhotoInput').click()" title="Photo">📷 Photo</button>
+                                    <button class="wa-attach-option" onclick="document.getElementById('chatVideoInput').click()" title="Video">🎥 Video</button>
+                                </div>
+                                <button class="wa-attach-btn" onclick="toggleAttachMenu()" title="Attach">📎</button>
+                                <input type="file" id="chatPhotoInput" accept="image/*" style="display:none;" onchange="previewChatPhoto(this)">
+                                <input type="file" id="chatVideoInput" accept="video/*" style="display:none;" onchange="previewChatVideo(this)">
+                                <div class="wa-composer">
+                                    <div id="chatReplyPreview" class="wa-reply-preview" style="display:none;"></div>
+                                    <div id="chatPhotoPreview" style="display:none;"></div>
+                                    <div id="chatVideoPreview" style="display:none;"></div>
+                                    <input type="text" id="chatMessageInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage();}">
+                                </div>
+                                <button class="wa-emoji-btn" onclick="toggleEmojiBar()" title="Emoji">😊</button>
+                                <button class="wa-send-btn" onclick="sendChatMessage()" title="Send">
+                                    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                                </button>
+                            </div>
+                            <!-- Emoji quick bar -->
+                            <div class="wa-emoji-bar" id="waEmojiBar" style="display:none;">
+                                <span onclick="appendEmoji('💪')">💪</span><span onclick="appendEmoji('🔥')">🔥</span><span onclick="appendEmoji('🏆')">🏆</span><span onclick="appendEmoji('✅')">✅</span><span onclick="appendEmoji('📢')">📢</span><span onclick="appendEmoji('🎉')">🎉</span><span onclick="appendEmoji('👏')">👏</span><span onclick="appendEmoji('😊')">😊</span><span onclick="appendEmoji('❤️')">❤️</span><span onclick="appendEmoji('🙌')">🙌</span><span onclick="appendEmoji('⚡')">⚡</span><span onclick="appendEmoji('🏋️')">🏋️</span>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="chat-input-bar">
-                        <button class="chat-attach-btn" onclick="document.getElementById('chatPhotoInput').click()" title="Attach Photo">📎</button>
-                        <input type="file" id="chatPhotoInput" accept="image/*" style="display:none;" onchange="previewChatPhoto(this)">
-                        <div style="flex: 1; display: flex; flex-direction: column;">
-                            <div class="chat-composer-topline">
-                                <label class="chat-composer-label" for="chatSenderSelect">Posting as</label>
-                                <select id="chatSenderSelect" class="chat-sender-select"></select>
-                            </div>
-                            <div id="chatReplyPreview" class="chat-reply-preview" style="display:none;"></div>
-                            <div id="chatPhotoPreview" style="display:none;"></div>
-                            <input type="text" id="chatMessageInput" placeholder="Message the group..." onkeydown="if(event.key==='Enter') sendChatMessage()">
-                        </div>
-                        <button class="chat-send-btn" onclick="sendChatMessage()" title="Send">➤</button>
-                    </div>
+                    </div><!-- end wa-community-shell -->
+
+                    <!-- Hidden sender select kept for JS compat -->
+                    <select id="chatSenderSelect" style="display:none;"></select>
                 </div>
 
             </div><!-- End content-wrapper -->
@@ -4721,6 +4776,112 @@
         }
 
         // ========== INITIALIZE ==========
+        // ========== COMMUNITY WA UI HELPERS ==========
+        function toggleAttachMenu() {
+            var m = document.getElementById('waAttachMenu');
+            m.style.display = m.style.display === 'none' ? 'flex' : 'none';
+        }
+        function toggleEmojiBar() {
+            var b = document.getElementById('waEmojiBar');
+            b.style.display = b.style.display === 'none' ? 'flex' : 'none';
+        }
+        function appendEmoji(e) {
+            var inp = document.getElementById('chatMessageInput');
+            inp.value += e;
+            inp.focus();
+        }
+        function switchChannel(ch) {
+            document.querySelectorAll('.wa-channel-item').forEach(function(el){
+                el.classList.toggle('active', el.dataset.channel === ch);
+            });
+            document.querySelectorAll('.wa-dm-item').forEach(function(el){
+                el.classList.remove('active');
+            });
+            var nameEl = document.getElementById('waChatHeaderName');
+            var subEl = document.getElementById('chatGroupMeta');
+            var avatarEl = document.getElementById('waChatHeaderAvatar');
+            if (ch === 'group') {
+                nameEl.textContent = document.getElementById('chatGroupName').textContent;
+                subEl.textContent = document.getElementById('chatGroupMeta').textContent || 'Community group';
+                avatarEl.innerHTML = document.getElementById('chatGroupAvatar').innerHTML;
+                document.getElementById('waQuickBar').style.display = '';
+            } else if (ch === 'announcements') {
+                nameEl.textContent = 'Announcements';
+                subEl.textContent = 'Owner-only broadcasts';
+                avatarEl.textContent = '📢';
+                document.getElementById('waQuickBar').style.display = '';
+            }
+            // Mobile
+            if (window.innerWidth <= 680) {
+                document.querySelector('.wa-sidebar').classList.add('hidden');
+                document.querySelector('.wa-chat-area').classList.add('mobile-open');
+            }
+        }
+        function switchDm(memberId, memberName) {
+            document.querySelectorAll('.wa-channel-item, .wa-dm-item').forEach(function(el){
+                el.classList.remove('active');
+            });
+            var item = document.querySelector('[data-dm="'+memberId+'"]');
+            if (item) item.classList.add('active');
+            document.getElementById('waChatHeaderName').textContent = memberName;
+            document.getElementById('chatGroupMeta').textContent = 'Direct message';
+            document.getElementById('waChatHeaderAvatar').textContent = memberName.charAt(0).toUpperCase();
+            document.getElementById('waQuickBar').style.display = 'none';
+            if (window.innerWidth <= 680) {
+                document.querySelector('.wa-sidebar').classList.add('hidden');
+                document.querySelector('.wa-chat-area').classList.add('mobile-open');
+            }
+        }
+        function closeMobileChat() {
+            document.querySelector('.wa-sidebar').classList.remove('hidden');
+            document.querySelector('.wa-chat-area').classList.remove('mobile-open');
+        }
+        function filterCommunityChats(q) {
+            q = q.toLowerCase();
+            document.querySelectorAll('.wa-dm-item').forEach(function(el){
+                el.style.display = el.querySelector('.wa-dm-name').textContent.toLowerCase().includes(q) ? '' : 'none';
+            });
+        }
+        function previewChatVideo(input) {
+            var file = input.files[0];
+            if (!file) return;
+            var preview = document.getElementById('chatVideoPreview');
+            var url = URL.createObjectURL(file);
+            preview.style.display = 'block';
+            preview.innerHTML = '<div style="position:relative;display:inline-block;"><video src="'+url+'" style="height:70px;border-radius:10px;" controls></video><button onclick="clearVideoPreview()" style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:#FF5A5F;color:white;border:none;font-size:0.65rem;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button></div>';
+        }
+        function clearVideoPreview() {
+            document.getElementById('chatVideoPreview').style.display = 'none';
+            document.getElementById('chatVideoPreview').innerHTML = '';
+            document.getElementById('chatVideoInput').value = '';
+        }
+        // Populate member DM list from members array
+        function renderWaDmList() {
+            var list = document.getElementById('waMemberDmList');
+            if (!list) return;
+            var members = window.gymMembers || (window.ownerData && window.ownerData.members) || [];
+            if (!members.length) {
+                list.innerHTML = '<div style="padding:10px 16px;font-size:0.8rem;color:var(--text-light);">No members yet</div>';
+                return;
+            }
+            list.innerHTML = members.slice(0,20).map(function(m){
+                var initials = (m.name||'?').split(' ').map(function(w){return w[0];}).join('').toUpperCase().slice(0,2);
+                return '<div class="wa-dm-item" data-dm="'+m.id+'" onclick="switchDm(\''+m.id+'\',\''+encodeURIComponent(m.name||'Member')+'\')" >' +
+                    '<div class="wa-dm-avatar">'+initials+'</div>' +
+                    '<div><div class="wa-dm-name">'+(m.name||'Member')+'</div>' +
+                    '<div class="wa-dm-preview">'+(m.plan||'Member')+'</div></div>' +
+                    '</div>';
+            }).join('');
+        }
+        document.addEventListener('click', function(e){
+            var menu = document.getElementById('waAttachMenu');
+            if (menu && menu.style.display !== 'none') {
+                if (!e.target.closest('.wa-attach-btn') && !e.target.closest('.wa-attach-menu') && !e.target.closest('.wa-attach-option')) {
+                    menu.style.display = 'none';
+                }
+            }
+        });
+
         // ========== THEME TOGGLE ==========
         function bindThemeToggle() {
             var toggleButton = document.getElementById('themeToggleButton');
@@ -5638,6 +5799,7 @@
                 bindThemeToggle();
                 loadTheme();
                 updateDashboardMode('tab-overview');
+                setTimeout(renderWaDmList, 1800);
 
                 // Override local memory natively with the authoritative cloud state
                 try {
