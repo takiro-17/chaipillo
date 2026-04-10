@@ -8,8 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <script>
         (function() {
-            var t = localStorage.getItem("superfit_theme");
-            if (t === "dark") document.documentElement.setAttribute("data-theme", "dark");
+            var t = localStorage.getItem("superfit_theme") || "dark";
+            if (t !== "light") document.documentElement.setAttribute("data-theme", "dark");
         })();
     </script>
 </head>
