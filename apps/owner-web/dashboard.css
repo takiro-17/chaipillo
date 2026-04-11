@@ -2843,28 +2843,61 @@ input.modal-surface-input[readonly] {
 
 .chat-message-actions {
   display: flex;
-  gap: 0.45rem;
-  margin-top: 0.35rem;
+  gap: 4px;
+  position: absolute;
+  bottom: calc(100% + 4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+  z-index: 20;
+  background: var(--bg-color);
+  border-radius: 20px;
+  padding: 4px 6px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  white-space: nowrap;
 }
 
 .chat-message-actions.own {
-  justify-content: flex-end;
+  right: 0;
+}
+.chat-message-actions:not(.own) {
+  left: 0;
+}
+
+.chat-message-stack {
+  position: relative;
+}
+
+.chat-message-stack:hover .chat-message-actions,
+.chat-message-stack.show-actions .chat-message-actions {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .chat-action-btn {
   border: none;
   border-radius: 999px;
-  padding: 0.35rem 0.7rem;
-  background: rgba(79, 172, 254, 0.1);
-  color: #4facfe;
+  padding: 5px 10px;
+  background: transparent;
+  color: var(--text-dark);
   cursor: pointer;
-  font-size: 0.72rem;
-  font-weight: 700;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: 'Outfit', sans-serif;
+  transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.chat-action-btn:hover {
+  background: rgba(128,128,128,0.12);
 }
 
 .chat-action-btn.danger {
-  background: rgba(255, 90, 95, 0.1);
   color: #ff5a5f;
+}
+.chat-action-btn.danger:hover {
+  background: rgba(255,90,95,0.1);
 }
 
 .community-modal-overlay {
@@ -4416,4 +4449,35 @@ input.modal-surface-input[readonly] {
   }
   .wa-chat-area.mobile-open { display: flex; }
   .wa-back-btn { display: flex !important; }
+}
+
+/* ---- WA message action fixes ---- */
+.chat-message-stack { position: relative; }
+
+.wa-tick {
+  color: #00b09b;
+  font-size: 0.7rem;
+  margin-left: 2px;
+}
+
+/* hide actions by default, show on hover (desktop) */
+.chat-message-actions {
+  display: flex;
+  gap: 4px;
+  position: absolute;
+  bottom: calc(100% + 6px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+  z-index: 20;
+  background: var(--bg-color);
+  border-radius: 20px;
+  padding: 4px 6px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  white-space: nowrap;
+}
+.chat-message-stack:hover > .chat-message-actions,
+.chat-message-stack.show-actions > .chat-message-actions {
+  opacity: 1;
+  pointer-events: auto;
 }

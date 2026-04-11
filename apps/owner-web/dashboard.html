@@ -5526,6 +5526,37 @@
             renderReplyComposer();
             var input = document.getElementById('chatMessageInput');
             if (input) input.focus();
+            hideAllActionMenus();
+        }
+
+        function editChatMessage(messageId) {
+            var message = getMessageById(messageId);
+            if (!message || message.sender !== 'owner') return;
+            hideAllActionMenus();
+            var input = document.getElementById('chatMessageInput');
+            if (!input) return;
+            input.value = message.text || '';
+            input.focus();
+            input.dataset.editingId = messageId;
+            // change send button label
+            var preview = document.getElementById('chatReplyPreview');
+            if (preview) {
+                preview.style.display = 'flex';
+                preview.innerHTML = '<div class="chat-reply-preview-copy"><strong>Editing message</strong><span>' + escapeHTML((message.text||'').slice(0,60)) + '</span></div>' +
+                    '<button type="button" class="chat-reply-preview-close" onclick="cancelEdit()">✕</button>';
+            }
+        }
+
+        function cancelEdit() {
+            var input = document.getElementById('chatMessageInput');
+            if (input) { input.value = ''; delete input.dataset.editingId; }
+            clearReplyTarget();
+        }
+
+        function hideAllActionMenus() {
+            document.querySelectorAll('.chat-message-stack.show-actions').forEach(function(el){
+                el.classList.remove('show-actions');
+            });
         }
 
         function clearReplyTarget() {
@@ -5686,11 +5717,12 @@
                     html += '<div>' + escapeHTML(message.text) + '</div>';
                 }
 
-                html += '<span class="chat-time">' + escapeHTML(message.time || '') + '</span>';
+                html += '<span class="chat-time">' + escapeHTML(message.time || '') + (message.edited ? ' <span style="font-size:0.6rem;opacity:0.6;">edited</span>' : '') + (message.sender === 'owner' ? ' <span class="wa-tick">✓✓</span>' : '') + '</span>';
                 html += '</div>';
                 html += '<div class="chat-message-actions ' + bubbleClass + '">' +
-                    '<button type="button" class="chat-action-btn" onclick="startReplyToMessage(' + message.id + ')">Reply</button>' +
-                    '<button type="button" class="chat-action-btn danger" onclick="deleteChatMessage(' + message.id + ')">Delete</button>' +
+                    '<button type="button" class="chat-action-btn" onclick="startReplyToMessage(' + message.id + ')" title="Reply">🔄 Reply</button>' +
+                    (message.sender === 'owner' ? '<button type="button" class="chat-action-btn" onclick="editChatMessage(' + message.id + ')" title="Edit">✏️ Edit</button>' : '') +
+                    '<button type="button" class="chat-action-btn danger" onclick="deleteChatMessage(' + message.id + ')" title="Delete">🗑️ Delete</button>' +
                 '</div>';
                 html += '</div>';
 
@@ -5702,6 +5734,21 @@
             });
 
             container.innerHTML = html;
+            // Bind long-press / touch for mobile action menus
+            container.querySelectorAll('.chat-bubble').forEach(function(bubble) {
+                var stack = bubble.closest('.chat-message-stack');
+                if (!stack) return;
+                var timer;
+                bubble.addEventListener('touchstart', function(e) {
+                    timer = setTimeout(function() {
+                        hideAllActionMenus();
+                        stack.classList.add('show-actions');
+                    }, 500);
+                }, { passive: true });
+                bubble.addEventListener('touchend', function() { clearTimeout(timer); }, { passive: true });
+                bubble.addEventListener('touchmove', function() { clearTimeout(timer); }, { passive: true });
+            });
+            // Click outside to close menus
             setTimeout(function() {
                 container.scrollTop = container.scrollHeight;
             }, 50);
@@ -5710,9 +5757,26 @@
         function sendChatMessage() {
             var input = document.getElementById('chatMessageInput');
             var text = input.value.trim();
+            var editingId = input.dataset.editingId ? parseInt(input.dataset.editingId) : null;
 
             if (!text && !pendingChatPhoto) return;
             if (!ownerData.communityMessages) ownerData.communityMessages = [];
+
+            // EDIT MODE
+            if (editingId) {
+                var idx = ownerData.communityMessages.findIndex(function(m){ return m.id === editingId; });
+                if (idx !== -1) {
+                    ownerData.communityMessages[idx].text = text;
+                    ownerData.communityMessages[idx].edited = true;
+                }
+                localStorage.setItem('fitconnect_owner', JSON.stringify(ownerData));
+                input.value = '';
+                delete input.dataset.editingId;
+                clearReplyTarget();
+                renderChat();
+                showToast('Message updated.', 'success');
+                return;
+            }
 
             var sender = getSelectedChatSender();
             var replyMessage = replyingToMessageId ? getMessageById(replyingToMessageId) : null;
